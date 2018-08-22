@@ -8,30 +8,129 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
 
-    <title>Hello, world!</title>
+    <title>MLB</title>
+    <style>
+      .jumbotron {
+          background-color: white;
+      }
+    </style>
   </head>
   <body>
-    <h1>Hello, world!</h1>
 
     <div class="container">
-      <div class="row">
-        <div class="col-sm">
-          One of three columns
-        </div>
-        <div class="col-sm">
-          One of three columns
-        </div>
-        <div class="col-sm">
-          One of three columns
-        </div>
-      </div>
+      <p>&nbsp;</p>
+      <h1 class="display-4">AutoML Benchmark</h1>
+      <p class="lead">Define you objective and compare different AutoML solutions easily</p>
+      <p class="lead">
+        <a class="btn btn-primary" href="#" role="button">Learn more</a>
+      </p>
     </div>
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-      <strong>Holy guacamole!</strong> You should check in on some of those fields below.
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>    <!-- Optional JavaScript -->
+
+    <hr class="my-4">
+
+    <div class="container">
+      <h3>Login</h3>
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="inputEmail4">Email</label>
+            <input type="email" class="form-control" id="inputEmail4" placeholder="Email">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="inputPassword4">Password</label>
+            <input type="password" class="form-control" id="inputPassword4" placeholder="Password">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Log in</button>
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+      </form>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="container">
+      <h3>Add dataset</h3>
+      <form>
+        <div class="form-group">
+          <input type="file" class="form-control-file" id="exampleFormControlFile1">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="container">
+      <h3>Define target</h3>
+      <form>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Variable Name</th>
+              <th scope="col">Ignored</th>
+              <th scope="col">Predictor</th>
+              <th scope="col">Target</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>v1</td>
+              <td><input type="radio" name="radio1"/></td>
+              <td><input type="radio" name="radio1" checked/></td>
+              <td><input type="radio" name="radio1"/></td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td>v2</td>
+              <td><input type="radio" name="radio2"/></td>
+              <td><input type="radio" name="radio2" checked/></td>
+              <td><input type="radio" name="radio2"/></td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Run</button>
+      </form>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="container">
+      <h3>Results</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Model</th>
+            <th scope="col">Metric1</th>
+            <th scope="col">Metric2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td><a href="http://scikit-learn.org/">model-zero</a></td>
+            <td>1</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td><a href="http://automl.github.io/auto-sklearn/stable/">auto-sklearn</a></td>
+            <td>2</td>
+            <td>2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
