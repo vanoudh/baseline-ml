@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/jquery.fileupload.css">
+
+    <title>MLB</title>
+    <style>
+      .jumbotron {
+          background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+      <p>&nbsp;</p>
+      <h1 class="display-4">AutoML Benchmark</h1>
+      <p class="lead">Define you objective and compare different AutoML solutions easily</p>
+      <p class="lead">
+        <a class="btn btn-primary" href="#" role="button">Learn more</a>
+      </p>
+    </div>
+
+    <button id="button1" class="btn btn-primary">button1</button>
+    <button id="button2" class="btn btn-primary">button2</button>
+    <button id="button3" class="btn btn-primary">button3</button>
+    <button id="button4" class="btn btn-primary">button4</button>
+
+    <hr class="my-4">
+    <div class="container" hidden>
+      <h3>Login</h3>
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="inputEmail4">Email</label>
+            <input type="email" class="form-control" id="inputEmail4" placeholder="Email">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="inputPassword4">Password</label>
+            <input type="password" class="form-control" id="inputPassword4" placeholder="Password">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" onclick="Login">Log in</button>
+        <button type="submit" class="btn btn-primary" onclick="Register">Register</button>
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+      </form>
+    </div>
+
+    <hr class="my-4">
+    <div class="container">
+      <h3>Add dataset</h3>
+        <!-- The fileinput-button span is used to style the file input field as button -->
+        <span class="btn btn-success fileinput-button">
+            <i class="glyphicon glyphicon-plus"></i>
+            <span>Select file</span>
+            <!-- The file input field used as target for the file upload widget -->
+            <input id="fileupload" type="file" name="files[]" data-url='/upload' multiple_no>
+        </span>
+        <br>
+        <br>
+        <!-- The global progress bar -->
+        <div id="progress" class="progress">
+            <div class="progress-bar progress-bar-success"></div>
+        </div>
+        <!-- The container for the uploaded files -->
+        <div id="files" class="files"></div>
+        <br>
+    </div>
+
+    <hr class="my-4">
+    <div class="container">
+      <h3>Define target</h3>
+      <!-- <form> -->
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Variable Name</th>
+              <th scope="col">Ignored</th>
+              <th scope="col">Predictor</th>
+              <th scope="col">Target</th>
+            </tr>
+          </thead>
+          <tbody id="target">
+            <tr id="targetline">
+              <th scope="row">1</th>
+              <td>---</td>
+              <td><input type="radio" name="temp"/></td>
+              <td><input type="radio" name="temp"/></td>
+              <td><input type="radio" name="temp"/></td>
+            </tr>
+          </tbody>
+        </table>
+        <button id="get_target" type="submit" class="btn btn-primary">get target</button>
+        <button id="run" type="submit" class="btn btn-primary" disabled>Run</button>
+      <!-- </form> -->
+    </div>
+
+    <hr class="my-4">
+    <div class="container">
+      <h3>Job</h3>
+      <div id="job">---</div>
+    </div>
+
+    <hr class="my-4">
+    <div class="container">
+      <h3>Results</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Model</th>
+            <th scope="col">Metric1</th>
+            <th scope="col">Metric2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td><a href="http://scikit-learn.org/">model-zero</a></td>
+            <td>1</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td><a href="http://automl.github.io/auto-sklearn/stable/">auto-sklearn</a></td>
+            <td>2</td>
+            <td>2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+    <script src="/static/js/vendor/jquery.ui.widget.js"></script>
+    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+    <script src="/static/js/jquery.iframe-transport.js"></script>
+    <!-- The basic File Upload plugin -->
+    <script src="/static/js/jquery.fileupload.js"></script>
+    <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- <script src="/static/app.js"></script> -->
+    <script>
+      var job = null;
+      var target = null;
+      function index_checked(usage) {
+        if (usage == 'predictor') return 3;
+        if (usage == 'target') return 4;
+        return 2;
+      }
+      function view_put_target(t) {
+        var e = $("#target")[0];
+        // make a copy of the template line before reset
+        var cln = e.children[0].cloneNode(true);
+        e.innerHTML = null;
+        j = 1;
+        for (var v in t) {
+          cln.children[0].innerText = j;
+          cln.children[1].innerText = v;
+          i_checked = index_checked(t[v]);
+          for (var i=2; i<=4; i++) {
+            cln.children[i].children[0].name = 'radio' + j;
+            cln.children[i].children[0].checked = i==i_checked;
+          }
+          e.appendChild(cln);
+          cln = e.children[0].cloneNode(true);
+          j++;
+        }
+        document.getElementById("run").disabled = false;
+      }
+      function view_get_target() {
+        t = {};
+        var e = $("#target")[0];
+        for (var i=0; i<e.children.length; i++) {
+          c = e.children[i];
+          v = c.children[1].innerText;
+          if (c.children[3].children[0].checked)
+            t[v] = 'predictor';
+          else if (c.children[4].children[0].checked)
+            t[v] = 'target';
+          else
+            t[v] = "ignored";
+        }
+        return t;
+      }
+      function view_put_job(job) {
+        $("#job")[0].innerText = job.status;
+      }
+      function model_get_target(){
+        var p = {
+          type: 'GET',
+          url: "/target",
+          dataType: "JSON",
+          success: function(data) {
+            target = data;
+            view_put_target(target);
+          }
+        };
+        $.ajax(p);
+      }
+      function model_put_job(j) {
+        var p = {
+          type: 'PUT',
+          url: "/job",
+          dataType: "JSON",
+          data: j,
+          success: function(data) {
+            job = data;
+            view_put_job(job);
+          }
+        };
+        $.ajax(p);
+      }
+      function model_get_job() {
+        var p = {
+          type: 'GET',
+          url: "/job",
+          dataType: "JSON",
+          success: function(data) {
+            job = data;
+            view_put_job(job);
+          }
+        };
+        $.ajax(p);
+      }
+      function model_put_target(t) {
+        var p = {
+          type: 'PUT',
+          url: "/target",
+          dataType: "JSON",
+          data: t,
+          success: function(data) {
+            console.log(data);
+            job = {'status': 'created'};
+            model_put_job(job);
+            setInterval(model_get_job, 5000);
+          }
+        };
+        $.ajax(p);
+      }
+    </script>
+    <script>
+    $(function () {
+        'use strict';
+        $('#fileupload').fileupload({
+            url: '/upload',
+            dataType: 'json',
+            add: function (e, data) {
+                // var fname = data.originalFiles[i].name;
+                data.context = $('<p/>').text('uploading...').appendTo('#files');
+                data.submit();
+            },
+            done: function (e, data) {
+                var fname = data.result['name'];
+                data.context.text(fname);
+                get_target();
+            },
+            progressall: function (e, data) {
+                console.log(data.loaded)
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .progress-bar').css(
+                    'width',
+                    progress + '%'
+                );
+            }
+        }).prop('disabled', !$.support.fileInput)
+            .parent().addClass($.support.fileInput ? undefined : 'disabled');
+    });
+    </script>
+    <script>
+        var t = {
+          'v1': 'predictor',
+          'v2': 'target',
+          'v3': ''
+        }
+        $("#button1").click(function(e) {
+          view_put_target(t);
+        });
+        $("#button2").click(function(e) {
+          t2 = view_get_target();
+          console.log(t2)
+        });
+        $("#button3").click(function(e) {
+          view_put_job('created---');
+        });
+        $("#button4").click(function(e) {
+          model_put_job({'status':'cool!!!'});
+        });
+        $("#get_target").click(function(e) {
+          model_get_target();
+        });
+        $("#run").click(function(e) {
+          target = view_get_target()
+          model_put_target(target);
+        });
+    </script>
+  </body>
+</html>

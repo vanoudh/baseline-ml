@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Sandbox</title>
+</head>
+<body>
+    <a href="/version">version</a>
+    <br><br>
+    <button id="get">GET</button>
+    <div id="error">---</div>
+    <div id="result">---</div>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script>
+    $(document).ready(function() {
+        $.ajax({
+          type: 'GET',
+          url: "/version",
+          dataType: "JSON",
+          success: function(data) {
+            $("#result").text(data.version);
+          },
+          error: function() {
+		        $("#error").text('error');
+	        }
+        });
+
+        $("button").click(function(event) {
+            $("#result").text("clicked");
+        });
+    });
+    // var request = new XMLHttpRequest();
+    // request.open('GET', '/version', true);
+    //
+    // request.onload = function() {
+    //   if (request.status >= 200 && request.status < 400) {
+    //     // Success!
+    //     var data = JSON.parse(request.responseText);
+    //     $("#result").text(request.responseText);
+    //   } else {
+    //     // We reached our target server, but it returned an error
+    //
+    //   }
+    // };
+    //
+    // request.onerror = function() {
+    //     $("#error").text('error')
+    // };
+    //
+    // request.send();
+    </script>
+
+</body>
+</html>
