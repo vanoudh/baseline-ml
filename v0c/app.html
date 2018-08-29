@@ -27,12 +27,14 @@
       </p>
     </div>
 
-    <button id="button1" class="btn btn-primary">button1</button>
-    <button id="button2" class="btn btn-primary">button2</button>
-    <button id="button3" class="btn btn-primary">button3</button>
-    <button id="button4" class="btn btn-primary">button4</button>
+    <div hidden>
+      <button id="button1" class="btn btn-primary">button1</button>
+      <button id="button2" class="btn btn-primary">button2</button>
+      <button id="button3" class="btn btn-primary">button3</button>
+      <button id="button4" class="btn btn-primary">button4</button>
+    </div>
 
-    <hr class="my-4">
+    <hr class="my-4" hidden>
     <div class="container" hidden>
       <h3>Login</h3>
       <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -94,7 +96,7 @@
             </tr>
           </thead>
           <tbody id="target">
-            <tr id="targetline">
+            <tr>
               <th scope="row">1</th>
               <td>---</td>
               <td><input type="radio" name="temp"/></td>
@@ -103,7 +105,6 @@
             </tr>
           </tbody>
         </table>
-        <button id="get_target" type="submit" class="btn btn-primary">get target</button>
         <button id="run" type="submit" class="btn btn-primary" disabled>Run</button>
       <!-- </form> -->
     </div>
@@ -122,22 +123,14 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">Model</th>
-            <th scope="col">Metric1</th>
-            <th scope="col">Metric2</th>
+            <th scope="col">Performance</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="result">
           <tr>
             <th scope="row">1</th>
-            <td><a href="http://scikit-learn.org/">model-zero</a></td>
-            <td>1</td>
-            <td>1</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td><a href="http://automl.github.io/auto-sklearn/stable/">auto-sklearn</a></td>
-            <td>2</td>
-            <td>2</td>
+            <td><a href="http://scikit-learn.org/">---</a></td>
+            <td>---</td>
           </tr>
         </tbody>
       </table>
@@ -159,105 +152,139 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <!-- <script src="/static/app.js"></script> -->
     <script>
-      var job = null;
-      var target = null;
-      function index_checked(usage) {
-        if (usage == 'predictor') return 3;
-        if (usage == 'target') return 4;
-        return 2;
-      }
-      function view_put_target(t) {
-        var e = $("#target")[0];
-        // make a copy of the template line before reset
-        var cln = e.children[0].cloneNode(true);
-        e.innerHTML = null;
-        j = 1;
-        for (var v in t) {
-          cln.children[0].innerText = j;
-          cln.children[1].innerText = v;
-          i_checked = index_checked(t[v]);
-          for (var i=2; i<=4; i++) {
-            cln.children[i].children[0].name = 'radio' + j;
-            cln.children[i].children[0].checked = i==i_checked;
-          }
-          e.appendChild(cln);
-          cln = e.children[0].cloneNode(true);
-          j++;
+    "use strict";
+    var job = null;
+    var target = null;
+    function index_checked(usage) {
+      if (usage == 'predictor') return 3;
+      if (usage == 'target') return 4;
+      return 2;
+    }
+    function view_put_target(t) {
+      var e = $("#target")[0];
+      var cln = e.children[0].cloneNode(true);
+      e.innerHTML = null;
+      var j = 1;
+      for (var v in t) {
+        cln.children[0].innerText = j;
+        cln.children[1].innerText = v;
+        var i_checked = index_checked(t[v]);
+        for (var i=2; i<=4; i++) {
+          cln.children[i].children[0].name = 'radio' + j;
+          cln.children[i].children[0].checked = i==i_checked;
         }
-        document.getElementById("run").disabled = false;
+        e.appendChild(cln);
+        cln = e.children[0].cloneNode(true);
+        j++;
       }
-      function view_get_target() {
-        t = {};
-        var e = $("#target")[0];
-        for (var i=0; i<e.children.length; i++) {
-          c = e.children[i];
-          v = c.children[1].innerText;
-          if (c.children[3].children[0].checked)
-            t[v] = 'predictor';
-          else if (c.children[4].children[0].checked)
-            t[v] = 'target';
-          else
-            t[v] = "ignored";
+      document.getElementById("run").disabled = false;
+    }
+    function view_get_target() {
+      var t = {};
+      var e = $("#target")[0];
+      for (var i=0; i<e.children.length; i++) {
+        var c = e.children[i];
+        var v = c.children[1].innerText;
+        if (c.children[3].children[0].checked)
+          t[v] = 'predictor';
+        else if (c.children[4].children[0].checked)
+          t[v] = 'target';
+        else
+          t[v] = "ignored";
+      }
+      return t;
+    }
+    function view_put_result(r) {
+      var e = $("#result")[0];
+      var cln = e.children[0].cloneNode(true);
+      e.innerHTML = null;
+      var j = 1;
+      for (var m in r) {
+        cln.children[0].innerText = j;
+        cln.children[1].innerText = m;
+        cln.children[2].innerText = r[m];
+        e.appendChild(cln);
+        cln = e.children[0].cloneNode(true);
+        j++;
+      }
+    }
+    function view_put_job(job) {
+      $("#job")[0].innerText = job.error
+        + ' - ' + job.control
+        + ' - ' + job.pid
+        + ' - ' + job.returncode;
+    }
+
+    function model_put_job(j) {
+      var p = {
+        type: 'PUT',
+        url: "/job",
+        dataType: "JSON",
+        data: j,
+        success: function(data) {
+          job = data;
+          view_put_job(job);
         }
-        return t;
-      }
-      function view_put_job(job) {
-        $("#job")[0].innerText = job.status;
-      }
-      function model_get_target(){
-        var p = {
-          type: 'GET',
-          url: "/target",
-          dataType: "JSON",
-          success: function(data) {
-            target = data;
-            view_put_target(target);
+      };
+      $.ajax(p);
+    }
+    function model_get_job() {
+      var p = {
+        type: 'GET',
+        url: "/job",
+        dataType: "JSON",
+        success: function(data) {
+          console.log(data)
+          job = data;
+          view_put_job(job);
+          if (job.returncode == 0) {
+            console.log('OK!!!')
+            model_get_result();
+            clearInterval(timer);
           }
-        };
-        $.ajax(p);
-      }
-      function model_put_job(j) {
-        var p = {
-          type: 'PUT',
-          url: "/job",
-          dataType: "JSON",
-          data: j,
-          success: function(data) {
-            job = data;
-            view_put_job(job);
-          }
-        };
-        $.ajax(p);
-      }
-      function model_get_job() {
-        var p = {
-          type: 'GET',
-          url: "/job",
-          dataType: "JSON",
-          success: function(data) {
-            job = data;
-            view_put_job(job);
-          }
-        };
-        $.ajax(p);
-      }
-      function model_put_target(t) {
-        var p = {
-          type: 'PUT',
-          url: "/target",
-          dataType: "JSON",
-          data: t,
-          success: function(data) {
-            console.log(data);
-            job = {'status': 'created'};
-            model_put_job(job);
-            setInterval(model_get_job, 5000);
-          }
-        };
-        $.ajax(p);
-      }
-    </script>
-    <script>
+        }
+      };
+      $.ajax(p);
+    }
+    function model_get_target(){
+      var p = {
+        type: 'GET',
+        url: "/target",
+        dataType: "JSON",
+        success: function(data) {
+          target = data;
+          view_put_target(target);
+        }
+      };
+      $.ajax(p);
+    }
+    var timer = null;
+    function model_put_target(t) {
+      var p = {
+        type: 'PUT',
+        url: "/target",
+        dataType: "JSON",
+        data: t,
+        success: function(data) {
+          console.log(data);
+          job = {'control': 'start'};
+          model_put_job(job);
+          timer = setInterval(model_get_job, 2500);
+        }
+      };
+      $.ajax(p);
+    }
+    function model_get_result(){
+      var p = {
+        type: 'GET',
+        url: "/result",
+        dataType: "JSON",
+        success: function(data) {
+          view_put_result(data);
+        }
+      };
+      $.ajax(p);
+    }
     $(function () {
         'use strict';
         $('#fileupload').fileupload({
@@ -271,7 +298,7 @@
             done: function (e, data) {
                 var fname = data.result['name'];
                 data.context.text(fname);
-                get_target();
+                model_get_target();
             },
             progressall: function (e, data) {
                 console.log(data.loaded)
@@ -284,33 +311,31 @@
         }).prop('disabled', !$.support.fileInput)
             .parent().addClass($.support.fileInput ? undefined : 'disabled');
     });
-    </script>
-    <script>
-        var t = {
-          'v1': 'predictor',
-          'v2': 'target',
-          'v3': ''
-        }
-        $("#button1").click(function(e) {
-          view_put_target(t);
-        });
-        $("#button2").click(function(e) {
-          t2 = view_get_target();
-          console.log(t2)
-        });
-        $("#button3").click(function(e) {
-          view_put_job('created---');
-        });
-        $("#button4").click(function(e) {
-          model_put_job({'status':'cool!!!'});
-        });
-        $("#get_target").click(function(e) {
-          model_get_target();
-        });
-        $("#run").click(function(e) {
-          target = view_get_target()
-          model_put_target(target);
-        });
+    var t = {
+      'v1': 'predictor',
+      'v2': 'target',
+      'v3': ''
+    }
+    $("#button1").click(function(e) {
+      view_put_target(t);
+    });
+    $("#button2").click(function(e) {
+      t2 = view_get_target();
+      console.log(t2)
+    });
+    $("#button3").click(function(e) {
+      // model_get_result();
+    });
+    $("#button4").click(function(e) {
+      model_put_job({'status':'cool!!!'});
+    });
+    $("#get_target").click(function(e) {
+      model_get_target();
+    });
+    $("#run").click(function(e) {
+      target = view_get_target()
+      model_put_target(target);
+    });
     </script>
   </body>
 </html>
