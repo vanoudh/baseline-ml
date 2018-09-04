@@ -10,4 +10,4 @@ sleep 1
 echo 'running...'
 sleep 1
 echo 'done'
-echo {\"model-zero\": 1} > result.json
+echo {\"mock-model\": 0} > result.json

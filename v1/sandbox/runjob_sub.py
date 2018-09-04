@@ -2,7 +2,7 @@
 import time
 import subprocess
 
-p = subprocess.Popen([". ./runjob.sh"], shell=True)
+p = subprocess.Popen(["python autosk.py titanic.csv"], shell=True)
 # time.sleep(10)
 # p.terminate()
 # for i in range(10):

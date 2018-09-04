@@ -34,16 +34,16 @@
       <button id="button4" class="btn btn-primary">button4</button>
     </div>
 
-    <hr class="my-4" hidden>
-    <div class="container" hidden>
+    <hr class="my-4">
+    <div class="container">
       <h3>Login</h3>
-      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div class="alert alert-warning alert-dismissible fade show" role="alert" hidden>
         <strong>Holy guacamole!</strong> You should check in on some of those fields below.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form>
+      <div>
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="inputEmail4">Email</label>
@@ -54,21 +54,24 @@
             <input type="password" class="form-control" id="inputPassword4" placeholder="Password">
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" onclick="Login">Log in</button>
-        <button type="submit" class="btn btn-primary" onclick="Register">Register</button>
+        <button id="login" type="submit" class="btn btn-primary">Log in</button>
+        <button id="register" type="submit" class="btn btn-primary">Register</button>
         <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-      </form>
+      </div>
     </div>
 
     <hr class="my-4">
     <div class="container">
-      <h3>Add dataset</h3>
+      <h3>File</h3>
+        <!-- The container for the uploaded files -->
+        <div id="file" class="files">---</div>
+        <br>
         <!-- The fileinput-button span is used to style the file input field as button -->
         <span class="btn btn-success fileinput-button">
             <i class="glyphicon glyphicon-plus"></i>
-            <span>Select file</span>
+            <span>Upload a new file</span>
             <!-- The file input field used as target for the file upload widget -->
-            <input id="fileupload" type="file" name="files[]" data-url='/upload' multiple_no>
+            <input id="fileupload" type="file" name="files[]" multiple_no>
         </span>
         <br>
         <br>
@@ -76,15 +79,11 @@
         <div id="progress" class="progress">
             <div class="progress-bar progress-bar-success"></div>
         </div>
-        <!-- The container for the uploaded files -->
-        <div id="files" class="files"></div>
-        <br>
     </div>
 
     <hr class="my-4">
     <div class="container">
       <h3>Define target</h3>
-      <!-- <form> -->
         <table class="table">
           <thead>
             <tr>
@@ -106,17 +105,12 @@
           </tbody>
         </table>
         <button id="run" type="submit" class="btn btn-primary" disabled>Run</button>
-      <!-- </form> -->
     </div>
 
-    <hr class="my-4">
+    <hr class="my-3">
     <div class="container">
-      <h3>Job</h3>
-      <div id="job">---</div>
-    </div>
-
-    <hr class="my-4">
-    <div class="container">
+      <h3>Job : <span id="job">---</span></h3>
+      <br>
       <h3>Results</h3>
       <table class="table">
         <thead>
@@ -153,8 +147,11 @@
     <!-- <script src="/static/app.js"></script> -->
     <script>
     "use strict";
-    var job = null;
-    var target = null;
+    var user_id = null;
+    var job = {};
+    var target = {};
+    var timer = null;
+    var returnmessage = {null:'Running', 0:'Success', 1:'Error'}
     function index_checked(usage) {
       if (usage == 'predictor') return 3;
       if (usage == 'target') return 4;
@@ -209,16 +206,17 @@
       }
     }
     function view_put_job(job) {
-      $("#job")[0].innerText = job.error
-        + ' - ' + job.control
-        + ' - ' + job.pid
-        + ' - ' + job.returncode;
+      console.log(job);
+      if (job.error)
+        $("#job")[0].innerText = job.error;
+      else
+        $("#job")[0].innerText = returnmessage[job.returncode];
     }
 
     function model_put_job(j) {
       var p = {
         type: 'PUT',
-        url: "/job",
+        url: "/job/" + user_id,
         dataType: "JSON",
         data: j,
         success: function(data) {
@@ -227,11 +225,13 @@
         }
       };
       $.ajax(p);
+      // view_put_job({});
+      // view_put_result({});
     }
     function model_get_job() {
       var p = {
         type: 'GET',
-        url: "/job",
+        url: "/job/" + user_id,
         dataType: "JSON",
         success: function(data) {
           console.log(data)
@@ -242,6 +242,35 @@
             model_get_result();
             clearInterval(timer);
           }
+          else if (job.returncode > 0) {
+            console.log('error')
+            clearInterval(timer);
+          }
+        }
+      };
+      $.ajax(p);
+    }
+    function model_get_user_id(){
+      var p = {
+        type: 'GET',
+        url: "/user_id/" + "email",
+        dataType: "JSON",
+        success: function(data) {
+          console.log(data);
+          user_id = data.user_id;
+          model_get_file();
+        }
+      };
+      $.ajax(p);
+    }
+    function model_get_file(){
+      var p = {
+        type: 'GET',
+        url: "/user_file/" + user_id,
+        dataType: "JSON",
+        success: function(data) {
+          $("#file").text(data);
+          set_upload();
         }
       };
       $.ajax(p);
@@ -249,7 +278,7 @@
     function model_get_target(){
       var p = {
         type: 'GET',
-        url: "/target",
+        url: "/target/" + user_id,
         dataType: "JSON",
         success: function(data) {
           target = data;
@@ -258,18 +287,17 @@
       };
       $.ajax(p);
     }
-    var timer = null;
     function model_put_target(t) {
       var p = {
         type: 'PUT',
-        url: "/target",
+        url: "/target/" + user_id,
         dataType: "JSON",
         data: t,
         success: function(data) {
           console.log(data);
           job = {'control': 'start'};
           model_put_job(job);
-          timer = setInterval(model_get_job, 2500);
+          timer = setInterval(model_get_job, 4000);
         }
       };
       $.ajax(p);
@@ -277,7 +305,7 @@
     function model_get_result(){
       var p = {
         type: 'GET',
-        url: "/result",
+        url: "/result/" + user_id,
         dataType: "JSON",
         success: function(data) {
           view_put_result(data);
@@ -285,49 +313,30 @@
       };
       $.ajax(p);
     }
-    $(function () {
-        'use strict';
-        $('#fileupload').fileupload({
-            url: '/upload',
-            dataType: 'json',
-            add: function (e, data) {
-                // var fname = data.originalFiles[i].name;
-                data.context = $('<p/>').text('uploading...').appendTo('#files');
-                data.submit();
-            },
-            done: function (e, data) {
-                var fname = data.result['name'];
-                data.context.text(fname);
-                model_get_target();
-            },
-            progressall: function (e, data) {
-                console.log(data.loaded)
-                var progress = parseInt(data.loaded / data.total * 100, 10);
-                $('#progress .progress-bar').css(
-                    'width',
-                    progress + '%'
-                );
-            }
-        }).prop('disabled', !$.support.fileInput)
-            .parent().addClass($.support.fileInput ? undefined : 'disabled');
-    });
-    var t = {
-      'v1': 'predictor',
-      'v2': 'target',
-      'v3': ''
+    function set_upload() {
+      console.log(user_id);
+      $('#fileupload').fileupload({
+          url: '/upload/' + user_id,
+          dataType: 'json',
+          add: function (e, data) {
+              // data.context = $('<p/>').text('uploading...').appendTo('#file');
+              data.context = $('#file').text('uploading...');
+              data.submit();
+          },
+          done: function (e, data) {
+              var fname = data.result['name'];
+              data.context.text(fname);
+              model_get_target();
+          },
+          progressall: function (e, data) {
+              var progress = parseInt(data.loaded / data.total * 100, 10);
+              $('#progress .progress-bar').css('width', progress + '%');
+          }
+      }).prop('disabled', !$.support.fileInput)
+          .parent().addClass($.support.fileInput ? undefined : 'disabled');
     }
-    $("#button1").click(function(e) {
-      view_put_target(t);
-    });
-    $("#button2").click(function(e) {
-      t2 = view_get_target();
-      console.log(t2)
-    });
-    $("#button3").click(function(e) {
-      // model_get_result();
-    });
-    $("#button4").click(function(e) {
-      model_put_job({'status':'cool!!!'});
+    $("#login").click(function(e) {
+      model_get_user_id();
     });
     $("#get_target").click(function(e) {
       model_get_target();

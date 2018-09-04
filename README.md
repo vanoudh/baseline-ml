@@ -1,23 +1,11 @@
 # mlb
 
+user
 
-upload file
+dataset
 
-get target
+target
 
-put target
+job
 
-put job
-
-get job
-
-if job.status == done
-    get results
-
-
-
-
-
-runjob.sh
-  input path_to_dataset
-  input path_to_target
+result

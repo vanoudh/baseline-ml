@@ -12,24 +12,24 @@
   <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
   <script>
   $("#apiget").click(function(e) {
-    // $.ajax({
-    //   type: 'GET',
-    //   url: "/target",
-    //   dataType: "JSON",
-    //   success: function(data) { console.log(data);}
-    // });
+    $.ajax({
+      type: 'GET',
+      url: "/target",
+      dataType: "JSON",
+      success: function(data) { console.log('target'); console.log(data);}
+    });
     $.ajax({
       type: 'GET',
       url: "/job",
       dataType: "JSON",
-      success: function(data) { console.log(data);}
+      success: function(data) { console.log('job'); console.log(data);}
     });
-    // $.ajax({
-    //   type: 'GET',
-    //   url: "/result",
-    //   dataType: "JSON",
-    //   success: function(data) { console.log(data);}
-    // });
+    $.ajax({
+      type: 'GET',
+      url: "/result",
+      dataType: "JSON",
+      success: function(data) { console.log('result'); console.log(data);}
+    });
   });
   $("#apiput").click(function(e) {
     // $.ajax({
