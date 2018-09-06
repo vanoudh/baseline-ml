@@ -19,7 +19,7 @@ class FileStore:
 
     def get_path(self, user_id, file_id):
         """Doc."""
-        li = ['file', str(user_id), str(file_id)]
+        li = [str(user_id), str(file_id)]
         return os.path.join(STORAGE_FOLDER, S.join(li))
 
 
@@ -28,17 +28,22 @@ class DocStore:
 
     def get_path(self, user_id, doc_id):
         """Doc."""
-        li = ['doc', str(user_id), str(doc_id)]
+        li = [str(user_id), str(doc_id), 'json']
         return os.path.join(STORAGE_FOLDER, S.join(li))
 
-    def put(self, user_id, doc_id, doc):
+    def put(self, user_id, doc_id, doc, overwrite=False):
         """Doc."""
         path = self.get_path(user_id, doc_id)
+        if not overwrite:
+            if os.path.isfile(path):
+                raise FileExistsError(path)
         with open(path, 'w') as f:
             json.dump(doc, f)
 
     def get(self, user_id, doc_id):
         """Doc."""
         path = self.get_path(user_id, doc_id)
+        if not os.path.isfile(path):
+            return None
         with open(path) as f:
             return json.load(f)

@@ -6,30 +6,23 @@
 </head>
 <body>
 
-  <button id="apiget">GET</button>
-  <button id="apiput">PUT</button>
+  Url <input id="zurl" value="user"></input><br>
+  Data <input id="zdata" value='{"hello": 5, "world": "!!"}'></input><br>
+  Type <input id="ztype" value="POST"></input><br>
+  <button id="run">Call</button>
 
   <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
   <script>
-  $("#apiget").click(function(e) {
-    $.ajax({
-      type: 'GET',
-      url: "/target",
+  $("#run").click(function(e) {
+    p = {
+      type: $("#ztype")[0].value,
+      url: "/" + $("#zurl")[0].value,
       dataType: "JSON",
-      success: function(data) { console.log('target'); console.log(data);}
-    });
-    $.ajax({
-      type: 'GET',
-      url: "/job",
-      dataType: "JSON",
-      success: function(data) { console.log('job'); console.log(data);}
-    });
-    $.ajax({
-      type: 'GET',
-      url: "/result",
-      dataType: "JSON",
-      success: function(data) { console.log('result'); console.log(data);}
-    });
+      data: JSON.parse($("#zdata")[0].value),
+      success: function(data) { console.log(data);}
+    }
+    console.log(p)
+    $.ajax(p);
   });
   $("#apiput").click(function(e) {
     // $.ajax({

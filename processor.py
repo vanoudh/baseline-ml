@@ -1,5 +1,4 @@
 """Doc."""
-import os
 import json
 import pandas as pd
 from subprocess import Popen
@@ -29,8 +28,8 @@ class Processor:
     def upload(self, user_id, file):
         """Doc."""
         filename = secure_filename(file.filename)
-        ds.put(user_id, 'file', filename)
-        self.is_mock = filename.endswith('mock.csv')
+        ds.put(user_id, 'file', filename, overwrite=True)
+        self.is_mock = filename.find('mock') >= 0
         fs.save(user_id, 'dataset', file)
         target = {}
         df = pd.read_csv(fs.get_path(user_id, 'dataset'))
@@ -45,7 +44,7 @@ class Processor:
 
     def set_target(self, user_id, t):
         """Doc."""
-        ds.put(user_id, 'target', t)
+        ds.put(user_id, 'target', t, overwrite=True)
         return t
 
     def set_job(self, user_id, job):
@@ -56,8 +55,9 @@ class Processor:
         if control not in 'start stop'.split():
             return {'error': 'unexpected control value'}
         if control == 'start':
-            mod = "autosk_mock.py" if self.is_mock else "autosk.py"
-            self.job = Popen("python " + mod + " " + str(user_id), shell=True)
+            model = "mock" if self.is_mock else "auto-sklearn"
+            cmd = "python autosk.py {} {}".format(user_id, model)
+            self.job = Popen(cmd, shell=True)
         elif control == 'stop':
             if self.job is None:
                 return {'error': 'stop on non existing job'}
