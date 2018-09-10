@@ -1,18 +1,23 @@
 """Doc."""
 from flask import Flask, request, send_from_directory, jsonify
-from flask_login import LoginManager, login_user, login_required
+from flask_login import LoginManager, login_user, login_required, logout_user
 from processor import Processor
 from storage import DocStore
-
+from email_checker import check_email
 from user import User
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 pro = Processor()
 ds = DocStore()
+
+
+def user_string(user):
+    """Doc."""
+    return "user {}: {}".format(user.id, user.is_authenticated)
 
 
 def get_user_from_storage(user_id):
@@ -22,19 +27,30 @@ def get_user_from_storage(user_id):
         return None
     user = User(user_id)
     user.password_hash = js['password_hash']
+    user.auth = js['auth']
     return user
 
 
 def save_user(user):
     """Doc."""
-    js = {'id': user.id, 'password_hash': user.password_hash}
-    ds.put(user.id, 'user', js)
+    print('save {}'.format(user_string(user)))
+    js = {
+        'id': user.id,
+        'password_hash': user.password_hash,
+        'auth': user.auth
+        }
+    ds.put(user.id, 'user', js, overwrite=True)
 
 
 @login_manager.user_loader
 def load_user(user_id):
     """Doc."""
-    return get_user_from_storage(user_id)
+    user = get_user_from_storage(user_id)
+    print('loaded {}'.format(user_string(user)))
+    return user
+
+
+""" Definition of routes. """
 
 
 @app.route('/')
@@ -56,6 +72,7 @@ def _version():
 
 
 @app.route('/upload/<string:user_id>', methods=['POST'])
+@login_required
 def _upload(user_id):
     """Doc."""
     file = request.files['files[]']
@@ -71,6 +88,8 @@ def _register():
     user = get_user_from_storage(user_id)
     if user is not None:
         return jsonify({'message': 'user already registered'})
+    if not check_email(user_id):
+        return jsonify({'message': 'invalid email'})
     user = User(user_id)
     user.set_password(password)
     user.check_password(password)
@@ -84,19 +103,28 @@ def _login():
     """Doc."""
     user_id = request.form['email']
     password = request.form['password']
-    print(user_id, password)
+    print(user_id)
     user = get_user_from_storage(user_id)
     if user is None or not user.check_password(password):
-        return jsonify({'user_id': user_id, 'auth': user.is_authenticated})
+        return jsonify({'message': 'login failed'})
+    save_user(user)
     login_user(user)
     return jsonify({'user_id': user_id, 'auth': user.is_authenticated})
 
 
-@app.route('/user_id/<string:user_email>')
+@app.route('/logout', methods=['POST'])
 @login_required
-def _user_id():
+def _logout():
     """Doc."""
-    return jsonify({'user_id': 0})
+    logout_user()
+    return jsonify({'logout': True})
+
+
+# @app.route('/user_id/<string:user_email>')
+# @login_required
+# def _user_id():
+#     """Doc."""
+#     return jsonify({'user_id': 0})
 
 
 @app.route('/user_file/<string:user_id>')
@@ -140,3 +168,4 @@ if __name__ == '__main__':
     app.secret_key = '42'
     app.config['JSON_SORT_KEYS'] = False
     app.run(debug=True)
+    # app.run(ssl_context='adhoc')

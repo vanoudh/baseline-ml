@@ -23,7 +23,7 @@
       <h1 class="display-4">AutoML Benchmark</h1>
       <p class="lead">Define you objective and compare different AutoML solutions easily</p>
       <p class="lead">
-        <a class="btn btn-primary" href="#" role="button">Learn more</a>
+        <a class="btn btn-primary" href="/static/more.html" role="button">Learn more</a>
       </p>
     </div>
 
@@ -43,19 +43,20 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div>
+      <div id="login_block">
         <div class="form-row">
           <div class="form-group col-md-6">
-            <label for="inputEmail4">Email</label>
+            <!-- <label for="inputEmail4">Email</label> -->
             <input type="email" class="form-control" id="inputEmail4" placeholder="Email">
           </div>
-          <div class="form-group col-md-6">
-            <label for="inputPassword4">Password</label>
+          <div id="password-block" class="form-group col-md-6">
+            <!-- <label for="inputPassword4">Password</label> -->
             <input type="password" class="form-control" id="inputPassword4" placeholder="Password">
           </div>
         </div>
         <button id="login" type="submit" class="btn btn-primary">Log in</button>
         <button id="register" type="submit" class="btn btn-primary">Register</button>
+        <button id="logout" type="submit" class="btn btn-primary" disabled>Log out</button>
         <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
       </div>
     </div>
@@ -113,7 +114,7 @@
       <p id="job">---</p>
     </div>
 
-    <hr class="my-3">
+    <hr class="my-4">
     <div class="container">
       <h3>Results</h3>
       <table class="table">
@@ -161,7 +162,8 @@
     function index_checked(usage) {
       if (usage == 'predictor') return 3;
       if (usage == 'target') return 4;
-      return 2;
+      if (usage == 'ignored') return 2;
+      return -1;
     }
 
     function view_put_target() {
@@ -169,6 +171,7 @@
       var cln = e.children[0].cloneNode(true);
       e.innerHTML = null;
       var j = 1;
+      var t = target == null ? {'---': '---'} : target;
       for (var v in target) {
         cln.children[0].innerText = j;
         cln.children[1].innerText = v;
@@ -190,6 +193,10 @@
       for (var i=0; i<e.children.length; i++) {
         var c = e.children[i];
         var v = c.children[1].innerText;
+        if (v == '---') {
+          target = null;
+          return;
+        }
         if (c.children[3].children[0].checked)
           target[v] = 'predictor';
         else if (c.children[4].children[0].checked)
@@ -262,6 +269,32 @@
       $.ajax(p);
     }
 
+    function login_callback(data) {
+      console.log(data);
+      if (data.auth) {
+        user_id = data.user_id;
+        $("#login").prop('disabled', true);
+        $("#register").prop('disabled', true);
+        $("#logout").prop('disabled', false);
+        $("#password-block").hide()
+        model_get_file();
+      }
+      else
+        alert(data.message)
+    }
+
+    function logout_callback(data) {
+      console.log(data);
+      if (data.logout) {
+        user_id = null;
+        set_upload();
+        $("#login").prop('disabled', false);
+        $("#register").prop('disabled', false);
+        $("#logout").prop('disabled', true);
+        $("#password-block").show()
+      }
+    }
+
     function model_post_register(){
       var p = {
         type: 'POST',
@@ -272,9 +305,7 @@
           'password': $("#inputPassword4")[0].value
         },
         success: function(data) {
-          console.log(data);
-          user_id = data.user_id;
-          model_get_file();
+          login_callback(data);
         }
       };
       // console.log(p);
@@ -291,12 +322,26 @@
           'password': $("#inputPassword4")[0].value
         },
         success: function(data) {
-          console.log(data);
-          user_id = data.user_id;
-          model_get_file();
+          login_callback(data);
         }
       };
-      console.log(p);
+      // console.log(p);
+      $.ajax(p);
+    }
+
+    function model_post_logout(){
+      var p = {
+        type: 'POST',
+        url: "/logout",
+        dataType: "JSON",
+        data: {
+          'email': $("#inputEmail4")[0].value
+        },
+        success: function(data) {
+          logout_callback(data);
+        }
+      };
+      // console.log(p);
       $.ajax(p);
     }
 
@@ -306,10 +351,14 @@
         url: "/user_file/" + user_id,
         dataType: "JSON",
         success: function(data) {
-          $("#file").text(data);
+          console.log(data);
           set_upload();
-          if (data != "no file, please upload one")
+          if (data == null)
+            $("#file").text("you have no file yet");
+          else {
+            $("#file").text(data);
             model_get_target()
+          }
         }
       };
       $.ajax(p);
@@ -321,6 +370,7 @@
         url: "/target/" + user_id,
         dataType: "JSON",
         success: function(data) {
+          console.log(data);
           target = data;
           job = null;
           result = null;
@@ -392,6 +442,9 @@
     });
     $("#register").click(function(e) {
       model_post_register();
+    });
+    $("#logout").click(function(e) {
+      model_post_logout();
     });
     $("#get_target").click(function(e) {
       model_get_target();

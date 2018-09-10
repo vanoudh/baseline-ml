@@ -19,9 +19,10 @@ class User(UserMixin):
     def check_password(self, password):
         """Doc."""
         self.auth = check_password_hash(self.password_hash, password)
+        print('auth: {}'.format(self.auth))
         return self.auth
 
-    # @property
-    # def is_authenticated(self):
-    #     """Doc."""
-    #     return self.auth
+    @property
+    def is_authenticated(self):
+        """Doc."""
+        return self.auth
