@@ -24,16 +24,16 @@ from sklearn.feature_selection import f_regression, f_classif
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import FunctionTransformer
 
-from sklearn2.feature_extraction import DateEncoder, SparseCatEncoder
-from sklearn2.feature_extraction import ConstantInputer, NumericFilter
-from sklearn2.decomposition import TruncatedSVD2
-from sklearn2.utils import TransformerWrap, PassThrought, numeric_cols, object_cols
-from sklearn2.utils import model_name
-from sklearn2.feature_selection import SelectKBest2
-from sklearn2.feature_selection import f_forest_regression, f_linear_regression
-from sklearn2.feature_selection import f_forest_classification, f_linear_classification
-from sklearn2.metrics import avg_roc_auc_scorer
-from sklearn2.automl_models import model_list
+from feature_extraction import DateEncoder, SparseCatEncoder
+from feature_extraction import ConstantInputer, NumericFilter
+from decomposition import TruncatedSVD2
+from utils import TransformerWrap, PassThrought, numeric_cols, object_cols
+from utils import model_name
+from feature_selection import SelectKBest2
+from feature_selection import f_forest_regression, f_linear_regression
+from feature_selection import f_forest_classification, f_linear_classification
+from metrics import avg_roc_auc_scorer
+from automl_models import model_list
 
 seed(0)
 

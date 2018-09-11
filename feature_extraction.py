@@ -10,8 +10,8 @@ import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.preprocessing import LabelEncoder
 
-from sklearn2.utils import object_cols, numeric_cols
-from sklearn2.utils import date_cols, align_columns, todf
+from utils import object_cols, numeric_cols
+from utils import date_cols, align_columns, todf
 
 logger = logging.getLogger(__name__)
 

@@ -5,14 +5,14 @@ Created on Tue Apr 19 19:09:57 2016
 @author: mvanoudh
 """
 
-import matplotlib
-matplotlib.use('agg')
+# import matplotlib
+# matplotlib.use('agg')
 
 import logging
 import numpy as np
 import pandas as pd
 import re
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.pipeline import Pipeline
@@ -20,7 +20,7 @@ from sklearn.linear_model import Ridge, LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import f_classif, SelectKBest
 
-from sklearn2.utils import ratio2int, get_forest, forest_sort
+from utils import ratio2int, get_forest, forest_sort
 
 
 logger = logging.getLogger(__name__)

@@ -7,7 +7,7 @@ Created on Tue Jun 13 17:23:46 2017
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import TruncatedSVD
-from sklearn2.utils import ratio2int, todf
+from utils import ratio2int, todf
 
      
 class TruncatedSVD2(BaseEstimator, TransformerMixin):

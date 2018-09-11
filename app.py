@@ -167,5 +167,5 @@ def _result(user_id):
 if __name__ == '__main__':
     app.secret_key = '42'
     app.config['JSON_SORT_KEYS'] = False
-    app.run(debug=True)
-    # app.run(ssl_context='adhoc')
+    # app.run(debug=False)
+    app.run(debug=True, ssl_context='adhoc', host='0.0.0.0', port=443)

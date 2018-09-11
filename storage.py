@@ -2,7 +2,7 @@
 import os
 import json
 
-STORAGE_FOLDER = '/home/vanoudh/dev/mlb/store'
+STORAGE_FOLDER = 'store'
 S = '-'
 
 if not os.path.isdir(STORAGE_FOLDER):
