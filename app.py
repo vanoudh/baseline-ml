@@ -8,6 +8,8 @@ from user import User
 
 
 app = Flask(__name__)
+app.secret_key = '42'
+app.config['JSON_SORT_KEYS'] = False
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -164,8 +166,8 @@ def _result(user_id):
     return jsonify(r)
 
 
-if __name__ == '__main__':
-    app.secret_key = '42'
-    app.config['JSON_SORT_KEYS'] = False
-    # app.run(debug=False)
-    app.run(debug=True, ssl_context='adhoc', host='0.0.0.0', port=443)
+# if __name__ == '__main__':
+#     app.secret_key = '42'
+#     app.config['JSON_SORT_KEYS'] = False
+#     # app.run(debug=False)
+#     app.run(debug=True, ssl_context='adhoc', host='0.0.0.0', port=443)
