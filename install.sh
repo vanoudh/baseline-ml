@@ -1,12 +1,16 @@
-# sudo apt-get install python-setuptools python3-dev build-essential swig
 # wget https://raw.githubusercontent.com/vanoudh/hello/master/install.sh
 
 # basics
-sudo apt-get install build-essential swig git
+sudo apt-get install build-essential swig git authbind
 sudo apt-get install python3 python3-dev
 wget https://bootstrap.pypa.io/get-pip.py
 sudo python3 get-pip.py
 sudo pip install --upgrade virtualenv
+
+# authbind
+sudo touch /etc/authbind/byport/80
+sudo chown marc_vanoudheusden /etc/authbind/byport/80
+sudo chmod 500 /etc/authbind/byport/80
 
 # virtual env
 virtualenv --python python3 env1
@@ -24,4 +28,4 @@ pip install auto-sklearn
 pip install gunicorn
 
 # run
-gunicorn app:app --chdir hello
+authbind gunicorn app:app --chdir hello -b :80
