@@ -28,4 +28,4 @@ pip install auto-sklearn
 pip install gunicorn
 
 # run
-authbind gunicorn app:app --chdir hello -b :80
+authbind gunicorn app:app --chdir hello -b :80 --workers 3 --timeout 120

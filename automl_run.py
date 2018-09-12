@@ -19,11 +19,15 @@ def run(user_id, model):
     df = pd.read_csv(path)
     predictors = [v for v in target if target[v] == 'predictor']
     targets = [v for v in target if target[v] == 'target']
+    if len(predictors) == 0:
+        raise ValueError('Expecting at least one predictor')
+    if len(targets) != 1:
+        raise ValueError('Expecting exactly one target')
     X = df[predictors]
     y = df[targets[0]]
     print(X.head())
     print(y.head())
-    if model == 'mock':
+    if len(df) <  10:
         time.sleep(5)
         score = 0.0099
     else:
@@ -38,4 +42,10 @@ def run(user_id, model):
 
 
 if __name__ == '__main__':
-    run(sys.argv[1], sys.argv[2])
+    try:
+        user_id, model = sys.argv[1], sys.argv[2]
+        run(user_id, model)
+    except Exception as e:
+        message = 'error : {}'.format(e)
+        ds.put(user_id, 'result', {model: message}, overwrite=True)
+        raise e

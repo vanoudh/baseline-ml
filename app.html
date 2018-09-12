@@ -122,13 +122,13 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">Model</th>
-            <th scope="col">Performance</th>
+            <th scope="col">Result</th>
           </tr>
         </thead>
         <tbody id="result">
           <tr>
             <th scope="row">1</th>
-            <td><a href="http://scikit-learn.org/">---</a></td>
+            <td>---</td>
             <td>---</td>
           </tr>
         </tbody>
@@ -262,6 +262,7 @@
           }
           else if (job.returncode > 0) {
             console.log('job error')
+            model_get_result();
             clearInterval(timer);
           }
         }
@@ -450,6 +451,10 @@
       model_get_target();
     });
     $("#run").click(function(e) {
+      job = null;
+      result = null;
+      view_put_job();
+      view_put_result();
       view_get_target()
       model_put_target();
     });

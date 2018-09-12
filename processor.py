@@ -15,7 +15,6 @@ class Processor:
 
     def __init__(self):
         """Doc."""
-        self.is_mock = True
         self.job = None
 
     def get_file(self, user_id):
@@ -55,8 +54,8 @@ class Processor:
         if control not in 'start stop'.split():
             return {'error': 'unexpected control value'}
         if control == 'start':
-            model = "mock" if self.is_mock else "auto-sklearn"
-            cmd = "python autosk.py {} {}".format(user_id, model)
+            model = "auto-sklearn"
+            cmd = "python automl_run.py {} {}".format(user_id, model)
             self.job = Popen(cmd, shell=True)
         elif control == 'stop':
             if self.job is None:

@@ -1,6 +1,7 @@
 """Doc."""
 from flask import Flask, request, send_from_directory, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user
+
 from processor import Processor
 from storage import DocStore
 from email_checker import check_email
@@ -167,7 +168,5 @@ def _result(user_id):
 
 
 # if __name__ == '__main__':
-#     app.secret_key = '42'
-#     app.config['JSON_SORT_KEYS'] = False
-#     # app.run(debug=False)
-#     app.run(debug=True, ssl_context='adhoc', host='0.0.0.0', port=443)
+#     app.run(debug=False)
+#     # app.run(debug=True, ssl_context='adhoc', host='0.0.0.0', port=443)

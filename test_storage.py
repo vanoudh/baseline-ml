@@ -1,7 +1,7 @@
 """Unit tests for storage."""
 
 
-from .storage import DocStore
+from plumbing.storage import DocStore
 
 ds = DocStore()
 
