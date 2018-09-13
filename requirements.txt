@@ -1,0 +1,8 @@
+flask
+flask-login
+urllib3
+pandas
+category_encoders
+gunicorn
+
+auto-sklearn
