@@ -87,7 +87,7 @@ def _register():
     """Doc."""
     user_id = request.form['email']
     password = request.form['password']
-    print(user_id, password)
+    print(user_id)
     user = get_user_from_storage(user_id)
     if user is not None:
         return jsonify({'message': 'user already registered'})
