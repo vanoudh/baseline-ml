@@ -43,7 +43,7 @@ def save_user(user):
         'password_hash': user.password_hash,
         'auth': user.auth
         }
-    ds.put(user.id, 'user', js, overwrite=True)
+    ds.put(user.id, 'user', js)
 
 
 @login_manager.user_loader
@@ -145,7 +145,7 @@ def _target(user_id):
     if request.method == 'GET':
         r = pro.get_target(user_id)
     elif request.method == 'PUT':
-        r = pro.set_target(user_id, request.form)
+        r = pro.set_target(user_id, request.form.to_dict())
     return jsonify(r)
 
 
@@ -156,7 +156,7 @@ def _job(user_id):
     if request.method == 'GET':
         r = pro.get_job(user_id)
     elif request.method == 'PUT':
-        r = pro.set_job(user_id, request.form)
+        r = pro.set_job(user_id, request.form.to_dict())
     return jsonify(r)
 
 

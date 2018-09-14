@@ -1,1 +1,1 @@
-authbind python app_run.py
+python app_run.py

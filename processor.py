@@ -22,12 +22,12 @@ class Processor:
         try:
             return ds.get(user_id, 'file')
         except FileNotFoundError:
-            return "no file, please upload one"
+            return {'filename': "no file, please upload one"}
 
     def upload(self, user_id, file):
         """Doc."""
         filename = secure_filename(file.filename)
-        ds.put(user_id, 'file', filename, overwrite=True)
+        ds.put(user_id, 'file', {'filename': filename})
         self.is_mock = filename.find('mock') >= 0
         fs.save(user_id, 'dataset', file)
         target = {}
@@ -43,7 +43,7 @@ class Processor:
 
     def set_target(self, user_id, t):
         """Doc."""
-        ds.put(user_id, 'target', t, overwrite=True)
+        ds.put(user_id, 'target', t)
         return t
 
     def set_job(self, user_id, job):

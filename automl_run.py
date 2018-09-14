@@ -15,6 +15,7 @@ fs = FileStore()
 def run(user_id, model):
     """Doc."""
     target = ds.get(user_id, 'target')
+    print(target)
     path = fs.get_path(user_id, 'dataset')
     df = pd.read_csv(path)
     predictors = [v for v in target if target[v] == 'predictor']
@@ -38,7 +39,7 @@ def run(user_id, model):
         # y_hat = best_model.predict(X_test)
         score = best_model.best_score_
     print("Score", score)
-    ds.put(user_id, 'result', {model: score}, overwrite=True)
+    ds.put(user_id, 'result', {model: score})
 
 
 if __name__ == '__main__':
@@ -47,5 +48,5 @@ if __name__ == '__main__':
         run(user_id, model)
     except Exception as e:
         message = 'error : {}'.format(e)
-        ds.put(user_id, 'result', {model: message}, overwrite=True)
+        ds.put(user_id, 'result', {model: message})
         raise e

@@ -26,24 +26,32 @@ class FileStore:
         li = [str(user_id), str(file_id)]
         return os.path.join(STORAGE_FOLDER, S.join(li))
 
-        
+
 class DocStore:
     """Doc."""
 
     def _key(self, user_id, doc_id):
         return client.key(str(user_id), doc_id)
 
-    def put(self, user_id, doc_id, doc, overwrite=False):
+    def put(self, user_id, doc_id, doc):
         """Doc."""
-        entity = datastore.Entity(self._key(user_id, doc_id))
-        
-        if not overwrite and self.get(user_id, doc_id):
-            raise FileExistsError('key exists already')
-
-        for k, v in doc.items():        # entity.update(doc) ?
-            entity[k] = v
+        print('put', doc)
+        entity = datastore.Entity(self._key(user_id, doc_id))        
+        entity.update(doc)
         client.put(entity)
 
     def get(self, user_id, doc_id):
         """Doc."""
-        return client.get(self._key(user_id, doc_id))
+        r = client.get(self._key(user_id, doc_id))
+        if r is None:
+            return r
+        doc = {}
+        for k, v in r.items():
+            doc[k] = v
+        print('get', doc)
+        return doc
+
+    def delete(self, user_id, doc_id):
+        """Doc."""
+        return client.delete(self._key(user_id, doc_id))
+
