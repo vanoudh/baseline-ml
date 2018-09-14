@@ -1,6 +1,7 @@
 """Doc."""
 from flask import Flask, request, send_from_directory, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user
+import secrets
 
 from processor import Processor
 from storage import DocStore
@@ -9,7 +10,7 @@ from user import User
 
 
 app = Flask(__name__)
-app.secret_key = '42'
+app.secret_key = secrets.token_hex(16)
 app.config['JSON_SORT_KEYS'] = False
 login_manager = LoginManager()
 login_manager.init_app(app)

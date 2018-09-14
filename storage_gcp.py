@@ -1,6 +1,10 @@
 """Doc."""
 import os
-import json
+from google.cloud import datastore
+
+
+project_id = os.getenv('GOOGLE_CLOUD_PROJECT')
+client = datastore.Client(project_id)
 
 STORAGE_FOLDER = 'store'
 S = '-'
@@ -22,28 +26,24 @@ class FileStore:
         li = [str(user_id), str(file_id)]
         return os.path.join(STORAGE_FOLDER, S.join(li))
 
-
+        
 class DocStore:
     """Doc."""
 
-    def _get_path(self, user_id, doc_id):
-        """Doc."""
-        li = [str(user_id), str(doc_id), 'json']
-        return os.path.join(STORAGE_FOLDER, S.join(li))
+    def _key(self, user_id, doc_id):
+        return client.key(str(user_id), doc_id)
 
     def put(self, user_id, doc_id, doc, overwrite=False):
         """Doc."""
-        path = self._get_path(user_id, doc_id)
-        if not overwrite:
-            if os.path.isfile(path):
-                raise FileExistsError(path)
-        with open(path, 'w') as f:
-            json.dump(doc, f)
+        entity = datastore.Entity(self._key(user_id, doc_id))
+        
+        if not overwrite and self.get(user_id, doc_id):
+            raise FileExistsError('key exists already')
+
+        for k, v in doc.items():        # entity.update(doc) ?
+            entity[k] = v
+        client.put(entity)
 
     def get(self, user_id, doc_id):
         """Doc."""
-        path = self._get_path(user_id, doc_id)
-        if not os.path.isfile(path):
-            return None
-        with open(path) as f:
-            return json.load(f)
+        return client.get(self._key(user_id, doc_id))

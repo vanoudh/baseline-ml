@@ -26,14 +26,14 @@ class FileStore:
 class DocStore:
     """Doc."""
 
-    def _get_path(self, user_id, doc_id):
+    def get_path(self, user_id, doc_id):
         """Doc."""
         li = [str(user_id), str(doc_id), 'json']
         return os.path.join(STORAGE_FOLDER, S.join(li))
 
     def put(self, user_id, doc_id, doc, overwrite=False):
         """Doc."""
-        path = self._get_path(user_id, doc_id)
+        path = self.get_path(user_id, doc_id)
         if not overwrite:
             if os.path.isfile(path):
                 raise FileExistsError(path)
@@ -42,7 +42,7 @@ class DocStore:
 
     def get(self, user_id, doc_id):
         """Doc."""
-        path = self._get_path(user_id, doc_id)
+        path = self.get_path(user_id, doc_id)
         if not os.path.isfile(path):
             return None
         with open(path) as f:
