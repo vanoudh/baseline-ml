@@ -1,5 +1,6 @@
 *.pyc
 *key.json
-store/*
+.store_cache
+.store_mock
 .pytest_cache
-.vscode/*
+.vscode

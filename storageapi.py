@@ -1,43 +1,42 @@
 """Doc."""
 import os
-from google.cloud import datastore, storage
+import json
+from google.cloud import storage
+from google.cloud import datastore
 
-STORAGE_FOLDER = 'local_storage'
+STORAGE_FOLDER = '.store_cache'
 S = '-'
 
 if not os.path.isdir(STORAGE_FOLDER):
     os.mkdir(STORAGE_FOLDER)
 
 project_id = os.getenv('GOOGLE_CLOUD_PROJECT')
-dc = datastore.Client(project_id)
+print('project id {}'.format(project_id))
+
 sc = storage.Client(project_id)
-
 BUCKET = '{}-media'.format(project_id)
-
 bucket = sc.get_bucket(BUCKET)
 
-# blob = bucket.blob('testblob')
-# blob.upload_from_string('content of test blob\n')
-# blob.download_to_filename('testblob.txt')
+dc = datastore.Client(project_id)
 
 
 class FileStore:
     """Doc."""
 
-    def save(self, user_id, file_id, file):
+    def save(self, kind, name, file):
         """Doc."""
-        filename = self._get_filename(user_id, file_id)
+        filename = self._get_filename(kind, name)
         blob = bucket.blob(filename)
         blob.upload_from_string(file.read(), content_type=file.content_type)
 
-    def _get_filename(self, user_id, file_id):
+    def _get_filename(self, kind, name):
         """Doc."""
-        li = [str(user_id), str(file_id)]
+        li = [str(kind), str(name)]
         return S.join(li)
 
-    def get_path(self, user_id, file_id):
+    def get_path(self, kind, name):
         """Doc."""
-        filename = self._get_filename(user_id, file_id)
+        filename = self._get_filename(kind, name)
         blob = bucket.blob(filename)
         path = os.path.join(STORAGE_FOLDER, filename)
         blob.download_to_filename(path)
@@ -47,19 +46,19 @@ class FileStore:
 class DocStore:
     """Doc."""
 
-    def _key(self, user_id, doc_id):
-        return dc.key(str(user_id), doc_id)
+    def _key(self, kind, name):
+        return dc.key(kind, name)
 
-    def put(self, user_id, doc_id, doc):
+    def put(self, kind, name, doc):
         """Doc."""
         print('put', doc)
-        entity = datastore.Entity(self._key(user_id, doc_id))        
+        entity = datastore.Entity(self._key(kind, name))        
         entity.update(doc)
         dc.put(entity)
 
-    def get(self, user_id, doc_id):
+    def get(self, kind, name):
         """Doc."""
-        r = dc.get(self._key(user_id, doc_id))
+        r = dc.get(self._key(kind, name))
         if r is None:
             return r
         doc = {}
@@ -68,7 +67,6 @@ class DocStore:
         print('get', doc)
         return doc
 
-    def delete(self, user_id, doc_id):
+    def delete(self, kind, name):
         """Doc."""
-        return dc.delete(self._key(user_id, doc_id))
-
+        return dc.delete(self._key(kind, name))

@@ -1,12 +1,13 @@
 """Doc."""
+import os
 from flask import Flask, request, send_from_directory, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user
 import secrets
 
 from processor import Processor
-from storage import DocStore
 from email_checker import check_email
 from user import User
+from storage_factory import ds
 
 
 app = Flask(__name__)
@@ -16,7 +17,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 pro = Processor()
-ds = DocStore()
 
 
 def user_string(user):
@@ -26,7 +26,7 @@ def user_string(user):
 
 def get_user_from_storage(user_id):
     """Doc."""
-    js = ds.get(user_id, 'user')
+    js = ds.get('user', user_id)
     if js is None:
         return None
     user = User(user_id)
@@ -39,11 +39,10 @@ def save_user(user):
     """Doc."""
     print('save {}'.format(user_string(user)))
     js = {
-        'id': user.id,
         'password_hash': user.password_hash,
         'auth': user.auth
         }
-    ds.put(user.id, 'user', js)
+    ds.put('user', user.id, js)
 
 
 @login_manager.user_loader
@@ -61,6 +60,12 @@ def load_user(user_id):
 def _home():
     """Doc."""
     return send_from_directory('.', 'app.html')
+
+
+@app.route('/app.js')
+def _js():
+    """Doc."""
+    return send_from_directory('.', 'app.js')
 
 
 @app.route('/favicon.ico')

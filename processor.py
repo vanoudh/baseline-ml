@@ -1,13 +1,11 @@
 """Doc."""
+import os
 import json
 import pandas as pd
 from subprocess import Popen
 from werkzeug.utils import secure_filename
-from storage import FileStore, DocStore
 
-
-fs = FileStore()
-ds = DocStore()
+from storage_factory import ds, fs
 
 
 class Processor:
@@ -20,18 +18,19 @@ class Processor:
     def get_file(self, user_id):
         """Doc."""
         try:
-            return ds.get(user_id, 'file')
+            return ds.get('file', user_id)
         except FileNotFoundError:
             return {'filename': "no file, please upload one"}
 
     def upload(self, user_id, file):
         """Doc."""
         filename = secure_filename(file.filename)
-        ds.put(user_id, 'file', {'filename': filename})
+        ds.put('file', user_id, {'filename': filename})
         self.is_mock = filename.find('mock') >= 0
-        fs.save(user_id, 'dataset', file)
+        fs.save('dataset', user_id, file)
         target = {}
-        df = pd.read_csv(fs.get_path(user_id, 'dataset'))
+        path = fs.get_path('dataset', user_id)
+        df = pd.read_csv(path)
         for c in df.columns:
             target[c] = 'predictor'
         self.set_target(user_id, target)
@@ -39,11 +38,11 @@ class Processor:
 
     def get_target(self, user_id):
         """Doc."""
-        return ds.get(user_id, 'target')
+        return ds.get('target', user_id)
 
     def set_target(self, user_id, t):
         """Doc."""
-        ds.put(user_id, 'target', t)
+        ds.put('target', user_id, t)
         return t
 
     def set_job(self, user_id, job):
@@ -73,4 +72,4 @@ class Processor:
 
     def get_result(self, user_id):
         """Doc."""
-        return ds.get(user_id, 'result')
+        return ds.get('result', user_id)

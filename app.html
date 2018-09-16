@@ -7,7 +7,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/css/jquery.fileupload.css">
+    <link rel="stylesheet" href="static/css/jquery.fileupload.css">
 
     <title>MLB</title>
     <style>
@@ -20,8 +20,8 @@
 
     <div class="container">
       <p>&nbsp;</p>
-      <h1 class="display-4">AutoML Benchmark</h1>
-      <p class="lead">Define you objective and compare different AutoML solutions easily</p>
+      <h1 class="display-4">Benchmarco</h1>
+      <p class="lead">Upload your dataset and compare predictions</p>
       <p class="lead">
         <a class="btn btn-primary" href="/static/more.html" role="button">Learn more</a>
       </p>
@@ -135,329 +135,22 @@
       </table>
     </div>
 
-    <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
     <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
-    <script src="/static/js/vendor/jquery.ui.widget.js"></script>
+    <script src="static/js/vendor/jquery.ui.widget.js"></script>
     <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-    <script src="/static/js/jquery.iframe-transport.js"></script>
+    <script src="static/js/jquery.iframe-transport.js"></script>
     <!-- The basic File Upload plugin -->
-    <script src="/static/js/jquery.fileupload.js"></script>
-    <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <!-- <script src="/static/app.js"></script> -->
-    <script>
-    "use strict";
-    var user_id = null;
-    var job = null;
-    var target = null;
-    var result = null;
-    var timer = null;
-    var returnmessage = {null:'Running', 0:'Success', 1:'Error'}
+    <script src="static/js/jquery.fileupload.js"></script>
 
-    function index_checked(usage) {
-      if (usage == 'predictor') return 3;
-      if (usage == 'target') return 4;
-      if (usage == 'ignored') return 2;
-      return -1;
-    }
-
-    function view_put_target() {
-      var e = $("#target")[0];
-      var cln = e.children[0].cloneNode(true);
-      e.innerHTML = null;
-      var j = 1;
-      var t = target == null ? {'---': '---'} : target;
-      for (var v in target) {
-        cln.children[0].innerText = j;
-        cln.children[1].innerText = v;
-        var i_checked = index_checked(target[v]);
-        for (var i=2; i<=4; i++) {
-          cln.children[i].children[0].name = 'radio' + j;
-          cln.children[i].children[0].checked = i==i_checked;
-        }
-        e.appendChild(cln);
-        cln = e.children[0].cloneNode(true);
-        j++;
-      }
-      document.getElementById("run").disabled = false;
-    }
-
-    function view_get_target() {
-      target = {};
-      var e = $("#target")[0];
-      for (var i=0; i<e.children.length; i++) {
-        var c = e.children[i];
-        var v = c.children[1].innerText;
-        if (v == '---') {
-          target = null;
-          return;
-        }
-        if (c.children[3].children[0].checked)
-          target[v] = 'predictor';
-        else if (c.children[4].children[0].checked)
-          target[v] = 'target';
-        else
-          target[v] = "ignored";
-      }
-    }
-
-    function view_put_result() {
-      var e = $("#result")[0];
-      var cln = e.children[0].cloneNode(true);
-      e.innerHTML = null;
-      var j = 1;
-      var r = result == null ? {'---': '---'} : result;
-      for (var m in r) {
-        cln.children[0].innerText = j;
-        cln.children[1].innerText = m;
-        cln.children[2].innerText = r[m];
-        e.appendChild(cln);
-        cln = e.children[0].cloneNode(true);
-        j++;
-      }
-    }
-
-    function view_put_job() {
-      console.log(job);
-      if (job == null)
-        $("#job")[0].innerText = '---';
-      else if (job.error)
-        $("#job")[0].innerText = job.error;
-      else
-        $("#job")[0].innerText = returnmessage[job.returncode];
-    }
-
-    function model_put_job() {
-      var p = {
-        type: 'PUT',
-        url: "/job/" + user_id,
-        dataType: "JSON",
-        data: job,
-        success: function(data) {
-          job = data;
-          view_put_job();
-        }
-      };
-      $.ajax(p);
-    }
-
-    function model_get_job() {
-      var p = {
-        type: 'GET',
-        url: "/job/" + user_id,
-        dataType: "JSON",
-        success: function(data) {
-          console.log(data)
-          job = data;
-          view_put_job();
-          if (job.returncode == 0) {
-            console.log('job OK')
-            model_get_result();
-            clearInterval(timer);
-          }
-          else if (job.returncode > 0) {
-            console.log('job error')
-            model_get_result();
-            clearInterval(timer);
-          }
-        }
-      };
-      $.ajax(p);
-    }
-
-    function login_callback(data) {
-      console.log(data);
-      if (data.auth) {
-        user_id = data.user_id;
-        $("#login").prop('disabled', true);
-        $("#register").prop('disabled', true);
-        $("#logout").prop('disabled', false);
-        $("#password-block").hide()
-        model_get_file();
-      }
-      else
-        alert(data.message)
-    }
-
-    function logout_callback(data) {
-      console.log(data);
-      if (data.logout) {
-        user_id = null;
-        set_upload();
-        $("#login").prop('disabled', false);
-        $("#register").prop('disabled', false);
-        $("#logout").prop('disabled', true);
-        $("#password-block").show()
-      }
-    }
-
-    function model_post_register(){
-      var p = {
-        type: 'POST',
-        url: "/register",
-        dataType: "JSON",
-        data: {
-          'email': $("#inputEmail4")[0].value,
-          'password': $("#inputPassword4")[0].value
-        },
-        success: function(data) {
-          login_callback(data);
-        }
-      };
-      // console.log(p);
-      $.ajax(p);
-    }
-
-    function model_post_login(){
-      var p = {
-        type: 'POST',
-        url: "/login",
-        dataType: "JSON",
-        data: {
-          'email': $("#inputEmail4")[0].value,
-          'password': $("#inputPassword4")[0].value
-        },
-        success: function(data) {
-          login_callback(data);
-        }
-      };
-      // console.log(p);
-      $.ajax(p);
-    }
-
-    function model_post_logout(){
-      var p = {
-        type: 'POST',
-        url: "/logout",
-        dataType: "JSON",
-        data: {
-          'email': $("#inputEmail4")[0].value
-        },
-        success: function(data) {
-          logout_callback(data);
-        }
-      };
-      // console.log(p);
-      $.ajax(p);
-    }
-
-    function model_get_file(){
-      var p = {
-        type: 'GET',
-        url: "/user_file/" + user_id,
-        dataType: "JSON",
-        success: function(data) {
-          console.log(data);
-          set_upload();
-          if (data == null)
-            $("#file").text("you have no file yet");
-          else {
-            $("#file").text(data.filename);
-            model_get_target()
-          }
-        }
-      };
-      $.ajax(p);
-    }
-
-    function model_get_target(){
-      var p = {
-        type: 'GET',
-        url: "/target/" + user_id,
-        dataType: "JSON",
-        success: function(data) {
-          console.log(data);
-          target = data;
-          job = null;
-          result = null;
-          view_put_job();
-          view_put_result();
-          view_put_target();
-        }
-      };
-      $.ajax(p);
-    }
-
-    function model_put_target() {
-      console.log(target);
-      var p = {
-        type: 'PUT',
-        url: "/target/" + user_id,
-        dataType: "JSON",
-        data: target,
-        success: function(data) {
-          console.log(data);
-          job = {'control': 'start'};
-          // result = null;
-          view_put_job();
-          // view_put_result();
-          model_put_job();
-          timer = setInterval(model_get_job, 4000);
-        }
-      };
-      $.ajax(p);
-    }
-
-    function model_get_result(){
-      var p = {
-        type: 'GET',
-        url: "/result/" + user_id,
-        dataType: "JSON",
-        success: function(data) {
-          result = data;
-          view_put_result();
-        }
-      };
-      $.ajax(p);
-    }
-
-    function set_upload() {
-      console.log(user_id);
-      $('#fileupload').fileupload({
-          url: '/upload/' + user_id,
-          dataType: 'json',
-          add: function (e, data) {
-              // data.context = $('<p/>').text('uploading...').appendTo('#file');
-              data.context = $('#file').text('uploading...');
-              data.submit();
-          },
-          done: function (e, data) {
-              var fname = data.result['name'];
-              data.context.text(fname);
-              model_get_target();
-          },
-          progressall: function (e, data) {
-              var progress = parseInt(data.loaded / data.total * 100, 10);
-              $('#progress .progress-bar').css('width', progress + '%');
-          }
-      }).prop('disabled', !$.support.fileInput)
-          .parent().addClass($.support.fileInput ? undefined : 'disabled');
-    }
-    $("#login").click(function(e) {
-      model_post_login();
-    });
-    $("#register").click(function(e) {
-      model_post_register();
-    });
-    $("#logout").click(function(e) {
-      model_post_logout();
-    });
-    $("#get_target").click(function(e) {
-      model_get_target();
-    });
-    $("#run").click(function(e) {
-      job = null;
-      result = null;
-      view_put_job();
-      view_put_result();
-      view_get_target()
-      model_put_target();
-    });
-    </script>
+    <script src="app.js"></script>
   </body>
 </html>
+
+<!-- Redundant libs -->
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->

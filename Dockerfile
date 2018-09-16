@@ -6,6 +6,8 @@ ADD . .
 # Install
 RUN pip3 install flask \
     flask-login \
+    grpcio \
+    google-cloud-storage \
     google-cloud-datastore \
     urllib3 \
     gunicorn

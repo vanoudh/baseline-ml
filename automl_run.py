@@ -5,18 +5,14 @@ import pandas as pd
 import sys
 from automl import get_best_model
 from sklearn.model_selection import train_test_split
-from storage import DocStore, FileStore
-
-
-ds = DocStore()
-fs = FileStore()
+from storage_factory import ds, fs
 
 
 def run(user_id, model):
     """Doc."""
-    target = ds.get(user_id, 'target')
+    target = ds.get('target', user_id)
     print(target)
-    path = fs.get_path(user_id, 'dataset')
+    path = fs.get_path('dataset', user_id)
     df = pd.read_csv(path)
     predictors = [v for v in target if target[v] == 'predictor']
     targets = [v for v in target if target[v] == 'target']
@@ -39,7 +35,7 @@ def run(user_id, model):
         # y_hat = best_model.predict(X_test)
         score = best_model.best_score_
     print("Score", score)
-    ds.put(user_id, 'result', {model: score})
+    ds.put('result', user_id, {model: score})
 
 
 if __name__ == '__main__':
@@ -48,5 +44,5 @@ if __name__ == '__main__':
         run(user_id, model)
     except Exception as e:
         message = 'error : {}'.format(e)
-        ds.put(user_id, 'result', {model: message})
+        ds.put('result', user_id, {model: message})
         raise e

@@ -2,11 +2,10 @@
 
 import pytest
 import secrets
-from .storage import DocStore
+from .storage_factory_pytest import ds
 
-ds = DocStore()
-id = secrets.token_hex(8)
-key = secrets.token_hex(8)
+kind = 'utest'
+name = secrets.token_hex(4//2)
 
 
 js = {
@@ -19,32 +18,31 @@ js = {
 
 def test1():
     """Put, get, delete."""
-    ds.put(id, key, js)
-    r = ds.get(id, key)
+    ds.put(kind, name, js)
+    r = ds.get(kind, name)
     assert r['PassengerId'] == 1
     assert r['Survived'] == 'target'
     assert r == js
     print(r)
-    ds.delete(id, key)
-    assert ds.get(id, key) == None
+    ds.delete(kind, name)
+    assert ds.get(kind, name) == None
 
 
 js = {
     "PassengerId": 1, 
     "Survived": "target", 
     "Pclass": {'a': 3}, 
-    "Sex": "predictor", 
-    "Fare": "predictor"
+    "Sex": "predictor" 
     }
 
 def test2():
     """Put, get, delete."""
-    ds.put(id, key, js)
-    r = ds.get(id, key)
+    ds.put(kind, name, js)
+    r = ds.get(kind, name)
     assert r['Pclass']['a'] == 3
     assert r == js
     print(r)
-    ds.delete(id, key)
-    assert ds.get(id, key) == None
+    ds.delete(kind, name)
+    assert ds.get(kind, name) == None
 
 
