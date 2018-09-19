@@ -3,9 +3,8 @@
 var user_id = null;
 var job = null;
 var target = null;
-var result = null;
 var timer = null;
-var returnmessage = {null:'Running', 0:'Success', 1:'Error'}
+var returnmessage = {null:'running', 0:'success', 1:'error'}
 
 function index_checked(usage) {
   if (usage == 'predictor') return 3;
@@ -50,34 +49,19 @@ function view_get_target() {
     else if (c.children[4].children[0].checked)
       target[v] = 'target';
     else
-      target[v] = "ignored";
-  }
-}
-
-function view_put_result() {
-  var e = $("#result")[0];
-  var cln = e.children[0].cloneNode(true);
-  e.innerHTML = null;
-  var j = 1;
-  var r = result == null ? {'---': '---'} : result;
-  for (var m in r) {
-    cln.children[0].innerText = j;
-    cln.children[1].innerText = m;
-    cln.children[2].innerText = r[m];
-    e.appendChild(cln);
-    cln = e.children[0].cloneNode(true);
-    j++;
+      target[v] = 'ignored';
   }
 }
 
 function view_put_job() {
-  console.log(job);
-  if (job == null)
-    $("#job")[0].innerText = '---';
-  else if (job.error)
-    $("#job")[0].innerText = job.error;
-  else
-    $("#job")[0].innerText = returnmessage[job.returncode];
+  if (job)
+    for (var m in job)
+      if (m != 'done') {
+        var r = job[m];
+        if (typeof r == "number")
+          r = r.toFixed(3);
+        $("#" + m)[0].innerText = r;
+      }
 }
 
 function model_put_job() {
@@ -103,16 +87,6 @@ function model_get_job() {
       console.log(data)
       job = data;
       view_put_job();
-      if (job.returncode == 0) {
-        console.log('job OK')
-        model_get_result();
-        clearInterval(timer);
-      }
-      else if (job.returncode > 0) {
-        console.log('job error')
-        model_get_result();
-        clearInterval(timer);
-      }
     }
   };
   $.ajax(p);
@@ -128,6 +102,7 @@ function login_callback(data) {
     $("#logout").prop('disabled', false);
     $("#password-block").hide()
     model_get_file();
+    timer = setInterval(model_get_job, 5000);
   }
   else
     alert(data.message)
@@ -143,6 +118,7 @@ function logout_callback(data) {
     $("#inputEmail4").prop('disabled', false);
     $("#logout").prop('disabled', true);
     $("#password-block").show()
+    clearInterval(timer);
   }
 }
 
@@ -223,11 +199,8 @@ function model_get_target(){
     success: function(data) {
       console.log(data);
       target = data;
-      job = null;
-      result = null;
-      view_put_job();
-      view_put_result();
       view_put_target();
+      model_get_job();
     }
   };
   $.ajax(p);
@@ -243,24 +216,8 @@ function model_put_target() {
     success: function(data) {
       console.log(data);
       job = {'control': 'start'};
-      // result = null;
       view_put_job();
-      // view_put_result();
       model_put_job();
-      timer = setInterval(model_get_job, 4000);
-    }
-  };
-  $.ajax(p);
-}
-
-function model_get_result(){
-  var p = {
-    type: 'GET',
-    url: "/result/" + user_id,
-    dataType: "JSON",
-    success: function(data) {
-      result = data;
-      view_put_result();
     }
   };
   $.ajax(p);
@@ -302,9 +259,8 @@ $("#get_target").click(function(e) {
 });
 $("#run").click(function(e) {
   job = null;
-  result = null;
   view_put_job();
-  view_put_result();
   view_get_target()
   model_put_target();
 });
+

@@ -20,18 +20,38 @@ from autosklearn.regression import AutoSklearnRegressor
 # model_constructor, is_regressor, is_tree, max_try, { parameters }
 
 
-model_list = [
-    # (DummyRegressor(), True, False, 10, {
-    #     'mo__strategy': ['mean', 'median']
-    # }),
-    # (DummyClassifier(), False, False, 10, {
-    #     'mo__strategy': ['stratified', 'most_frequent', 'prior', 'uniform']
-    # }),
+_no_model = [
+    (DummyRegressor(), True, False, 10, {
+        'mo__strategy': ['mean', 'median']
+    }),
+    (DummyClassifier(), False, False, 10, {
+        'mo__strategy': ['stratified', 'most_frequent', 'prior', 'uniform']
+    })
+]
 
+_linear_model = [
+    (Ridge(), True, False, 10, {
+    }),
+    (LogisticRegression(), False, False, 10, {
+    })
+]
+
+_auto_sklearn = [
     (AutoSklearnRegressor(), True, False, 1, {
-        'mo__time_left_for_this_task': [100]
+        'mo__time_left_for_this_task': [1000]
     }),
     (AutoSklearnClassifier(), False, False, 1, {
-        'mo__time_left_for_this_task': [100]
+        'mo__time_left_for_this_task': [1000]
     }),
 ]
+
+
+def model_factory(engine):
+    if engine == 'no-model':
+        return _no_model
+    if engine == 'linear-model':
+        return _linear_model
+    if engine == 'auto-sklearn':
+        return _auto_sklearn
+    raise ValueError('unknown engine :{}'.format(engine))
+

@@ -129,13 +129,6 @@ def _logout():
     return jsonify({'logout': True})
 
 
-# @app.route('/user_id/<string:user_email>')
-# @login_required
-# def _user_id():
-#     """Doc."""
-#     return jsonify({'user_id': 0})
-
-
 @app.route('/user_file/<string:user_id>')
 @login_required
 def _user_file(user_id):

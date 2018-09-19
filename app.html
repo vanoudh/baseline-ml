@@ -23,7 +23,7 @@
       <h1 class="display-4">Benchmarco</h1>
       <p class="lead">Upload your dataset and compare predictions</p>
       <p class="lead">
-        <a class="btn btn-primary" href="/static/more.html" role="button">Learn more</a>
+        <a class="btn btn-primary" href="static/more.html" role="button">Learn more</a>
       </p>
     </div>
 
@@ -108,11 +108,11 @@
         <button id="run" type="submit" class="btn btn-primary" disabled>Run</button>
     </div>
 
-    <hr class="my-3">
+    <!-- <hr class="my-3">
     <div class="container">
       <h3>Job</h3>
       <p id="job">---</p>
-    </div>
+    </div> -->
 
     <hr class="my-4">
     <div class="container">
@@ -125,11 +125,21 @@
             <th scope="col">Result</th>
           </tr>
         </thead>
-        <tbody id="result">
+        <tbody>
           <tr>
             <th scope="row">1</th>
-            <td>---</td>
-            <td>---</td>
+            <td>no-model</td>
+            <td id="no-model">---</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>linear-model</td>
+            <td id="linear-model">---</td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td><a href='https://automl.github.io/auto-sklearn/stable'>auto-sklearn</a></td>
+            <td id="auto-sklearn">---</td>
           </tr>
         </tbody>
       </table>

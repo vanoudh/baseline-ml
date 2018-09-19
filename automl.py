@@ -33,7 +33,7 @@ from feature_selection import SelectKBest2
 from feature_selection import f_forest_regression, f_linear_regression
 from feature_selection import f_forest_classification, f_linear_classification
 from metrics import avg_roc_auc_scorer
-from automl_models import model_list
+from automl_models import model_factory
 
 seed(0)
 
@@ -104,10 +104,11 @@ def get_pipeline(est, is_tree, is_regressor, params):
     return name, ppl, params
 
 
-def get_pipelines(x, y):
+def get_pipelines(x, y, engine):
     is_regressor, is_binary = get_type(y)
     ppl_list = []
-    for est, is_reg, is_tree, n_iter, params in model_list[:2]:
+    model_list = model_factory(engine)
+    for est, is_reg, is_tree, n_iter, params in model_list:
         if is_reg != is_regressor:
             continue
         name, ppl, params = get_pipeline(est, is_tree, is_regressor, params)
@@ -137,8 +138,9 @@ def get_cv(cv, y):
     return TimeSeriesSplit(n_splits=int(n))
 
 
-def get_search_models(x, y, scorer, cv, iter_factor, verbose):
-    ppl_list = get_pipelines(x, y)
+def get_search_models(x, y, scorer, cv, iter_factor, 
+                      engine, verbose):
+    ppl_list = get_pipelines(x, y, engine)
     cv = get_cv(cv, y)
     print('scorer:', scorer)
     print('cv:', cv)
@@ -151,9 +153,11 @@ def get_search_models(x, y, scorer, cv, iter_factor, verbose):
                                      verbose)
 
 
-def get_best_model(x, y, scorer=None, cv=None, iter_factor=1, verbose=0):
+def get_best_model(x, y, scorer=None, cv=None, iter_factor=1, 
+                   engine='auto-sklearn', verbose=0):
     best_sm = None
-    sms = get_search_models(x, y, scorer, cv, iter_factor, verbose)
+    sms = get_search_models(x, y, scorer, cv, iter_factor, 
+                            engine, verbose)
     for name, sm in sms:
         if verbose > 0:
             print('{} starting...'.format(name))
@@ -162,3 +166,28 @@ def get_best_model(x, y, scorer=None, cv=None, iter_factor=1, verbose=0):
             best_sm = sm
         print('{:>24} test score : {:.4f}'.format(name, sm.best_score_))
     return best_sm
+
+
+class AutoSimple:
+    def __init__(self, 
+                 scorer=None, 
+                 cv=None,   
+                 iter_factor=1, 
+                engine='auto-sklearn'):
+        self.scorer = scorer
+        self.cv = cv
+        self.iter_factor = iter_factor
+        self.engine = engine
+        self.model = None
+    
+    def fit(self, x, y, verbose=0):
+        self.model = get_best_model(x, y,
+                                    self.scorer,
+                                    self.cv,
+                                    self.iter_factor,
+                                    self.engine,
+                                    verbose)
+        return self.model
+
+    def predict(self, x):
+        return self.model.predict(x)
