@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from storage_factory import ds, fs
 
 
-MODEL_LIST = 'no-model linear-model auto-sklearn'.split()
+MODEL_LIST = 'no-model linear-model forest-model auto-sklearn'.split()
 
 
 class Processor:
@@ -72,13 +72,12 @@ class Processor:
         """Doc."""
         f = lambda m:ds.get('result-{}'.format(m), user_id)['result']
         r = list(map(f , MODEL_LIST))
-        done = 'running...' not in r
-        return { 
-            MODEL_LIST[0]: r[0],
-            MODEL_LIST[1]: r[1],
-            MODEL_LIST[2]: r[2],
-            'done': done
-            }
+        j = {}
+        for m, rr in zip(MODEL_LIST, r):
+            j[m] = rr
+        j['done'] = 'running...' not in r 
+        print(j)
+        return j
 
     def get_result(self, user_id):
         """Doc."""

@@ -1,5 +1,6 @@
 
 "use strict";
+
 var user_id = null;
 var job = null;
 var target = null;
@@ -78,6 +79,18 @@ function model_put_job() {
   $.ajax(p);
 }
 
+function model_post_feedback() {
+  var p = {
+    type: 'POST',
+    url: "/feedback/" + $("#email-input")[0].value,
+    dataType: "JSON",
+    data: {'text': $("#text-input")[0].value},
+    success: function(data) {
+    }
+  };
+  $.ajax(p);
+}
+
 function model_get_job() {
   var p = {
     type: 'GET',
@@ -98,7 +111,7 @@ function login_callback(data) {
     user_id = data.user_id;
     $("#login").prop('disabled', true);
     $("#register").prop('disabled', true);
-    $("#inputEmail4").prop('disabled', true);
+    $("#email-input").prop('disabled', true);
     $("#logout").prop('disabled', false);
     $("#password-block").hide()
     model_get_file();
@@ -115,7 +128,7 @@ function logout_callback(data) {
     set_upload();
     $("#login").prop('disabled', false);
     $("#register").prop('disabled', false);
-    $("#inputEmail4").prop('disabled', false);
+    $("#email-input").prop('disabled', false);
     $("#logout").prop('disabled', true);
     $("#password-block").show()
     clearInterval(timer);
@@ -128,14 +141,13 @@ function model_post_register(){
     url: "/register",
     dataType: "JSON",
     data: {
-      'email': $("#inputEmail4")[0].value,
-      'password': $("#inputPassword4")[0].value
+      'email': $("#email-input")[0].value,
+      'password': $("#password-input")[0].value
     },
     success: function(data) {
       login_callback(data);
     }
   };
-  // console.log(p);
   $.ajax(p);
 }
 
@@ -145,14 +157,13 @@ function model_post_login(){
     url: "/login",
     dataType: "JSON",
     data: {
-      'email': $("#inputEmail4")[0].value,
-      'password': $("#inputPassword4")[0].value
+      'email': $("#email-input")[0].value,
+      'password': $("#password-input")[0].value
     },
     success: function(data) {
       login_callback(data);
     }
   };
-  // console.log(p);
   $.ajax(p);
 }
 
@@ -162,13 +173,12 @@ function model_post_logout(){
     url: "/logout",
     dataType: "JSON",
     data: {
-      'email': $("#inputEmail4")[0].value
+      'email': $("#email-input")[0].value
     },
     success: function(data) {
       logout_callback(data);
     }
   };
-  // console.log(p);
   $.ajax(p);
 }
 
@@ -215,7 +225,7 @@ function model_put_target() {
     data: target,
     success: function(data) {
       console.log(data);
-      job = {'control': 'start'};
+      job = {'done': 'starting'};
       view_put_job();
       model_put_job();
     }
@@ -250,6 +260,13 @@ $("#login").click(function(e) {
 });
 $("#register").click(function(e) {
   model_post_register();
+});
+$("#feedback-show").click(function(e) {
+  $("#feedback-ctn").toggle(); 
+});
+$("#feedback-submit").click(function(e) {
+  model_post_feedback();
+  $("#feedback-ctn").hide();  
 });
 $("#logout").click(function(e) {
   model_post_logout();

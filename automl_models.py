@@ -36,12 +36,19 @@ _linear_model = [
     })
 ]
 
+_forest_model = [
+    (RandomForestRegressor(), True, True, 10, {
+    }),
+    (RandomForestClassifier(), False, True, 10, {
+    })
+]
+
 _auto_sklearn = [
     (AutoSklearnRegressor(), True, False, 1, {
-        'mo__time_left_for_this_task': [1000]
+        'mo__time_left_for_this_task': [600]
     }),
     (AutoSklearnClassifier(), False, False, 1, {
-        'mo__time_left_for_this_task': [1000]
+        'mo__time_left_for_this_task': [600]
     }),
 ]
 
@@ -51,6 +58,8 @@ def model_factory(engine):
         return _no_model
     if engine == 'linear-model':
         return _linear_model
+    if engine == 'forest-model':
+        return _forest_model
     if engine == 'auto-sklearn':
         return _auto_sklearn
     raise ValueError('unknown engine :{}'.format(engine))

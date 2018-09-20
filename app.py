@@ -129,6 +129,17 @@ def _logout():
     return jsonify({'logout': True})
 
 
+# @app.route('/feedback/<string:user_id>', methods=['POST'])
+# def _feedback(user_id):
+#     """Doc."""
+#     data = request.form.to_dict()
+#     if list(data.keys())[0] != 'text':
+#         return jsonify({'message': 'unexpected content'})
+#     data['text'] = data['text'][:6000] 
+#     ds.put('feedback', user_id, data)
+#     return jsonify({'user_id': user_id})
+
+
 @app.route('/user_file/<string:user_id>')
 @login_required
 def _user_file(user_id):

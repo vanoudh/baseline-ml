@@ -105,7 +105,7 @@ def get_pipeline(est, is_tree, is_regressor, params):
 
 
 def get_pipelines(x, y, engine):
-    is_regressor, is_binary = get_type(y)
+    is_regressor, _ = get_type(y)
     ppl_list = []
     model_list = model_factory(engine)
     for est, is_reg, is_tree, n_iter, params in model_list:
