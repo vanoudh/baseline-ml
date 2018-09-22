@@ -12,15 +12,14 @@ if not os.path.isdir(STORAGE_FOLDER):
 class FileStore:
     """Doc."""
 
-    def save(self, kind, name, file):
+    def save(self, filename, file):
         """Doc."""
-        path = self.get_path(kind, name)
+        path = self.get_path(filename)
         file.save(path)
 
-    def get_path(self, kind, name):
+    def get_path(self, filename):
         """Doc."""
-        li = [str(kind), str(name)]
-        return os.path.join(STORAGE_FOLDER, S.join(li))
+        return os.path.join(STORAGE_FOLDER, filename)
 
 
 class DocStore:
@@ -35,6 +34,13 @@ class DocStore:
         """Doc."""
         path = self._get_path(kind, name)
         with open(path, 'w') as f:
+            json.dump(doc, f)
+
+    def log(self, kind, doc):
+        """Doc."""
+        path = self._get_path(kind, 'log')
+        with open(path, 'a') as f:
+            f.write(os.linesep)
             json.dump(doc, f)
 
     def get(self, kind, name):

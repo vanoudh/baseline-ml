@@ -43,15 +43,6 @@ _forest_model = [
     })
 ]
 
-_auto_sklearn = [
-    (AutoSklearnRegressor(), True, False, 1, {
-        'mo__time_left_for_this_task': [600]
-    }),
-    (AutoSklearnClassifier(), False, False, 1, {
-        'mo__time_left_for_this_task': [600]
-    }),
-]
-
 
 def model_factory(engine):
     if engine == 'no-model':
@@ -60,7 +51,5 @@ def model_factory(engine):
         return _linear_model
     if engine == 'forest-model':
         return _forest_model
-    if engine == 'auto-sklearn':
-        return _auto_sklearn
     raise ValueError('unknown engine :{}'.format(engine))
 

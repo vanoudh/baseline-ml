@@ -142,8 +142,6 @@ def get_search_models(x, y, scorer, cv, iter_factor,
                       engine, verbose):
     ppl_list = get_pipelines(x, y, engine)
     cv = get_cv(cv, y)
-    print('scorer:', scorer)
-    print('cv:', cv)
     for name, ppl, params, n_iter in ppl_list:
         yield name, get_search_model(ppl,
                                      params,
@@ -160,11 +158,11 @@ def get_best_model(x, y, scorer=None, cv=None, iter_factor=1,
                             engine, verbose)
     for name, sm in sms:
         if verbose > 0:
-            print('{} starting...'.format(name))
+            logging.info('{} starting...'.format(name))
         sm.fit(x, y)
         if best_sm is None or sm.best_score_ > best_sm.best_score_:
             best_sm = sm
-        print('{:>24} test score : {:.4f}'.format(name, sm.best_score_))
+        logging.info('{:>24} test score : {:.4f}'.format(name, sm.best_score_))
     return best_sm
 
 

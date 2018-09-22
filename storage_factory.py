@@ -1,7 +1,8 @@
 import os
+import logging
 
 if os.getenv('LOCAL') == 'yes':
-    print('Using storage mock')
+    logging.info('Using storage mock')
     from storageapi_mock import FileStore, DocStore
 else:
     from storageapi import FileStore, DocStore

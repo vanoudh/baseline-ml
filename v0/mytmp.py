@@ -7,4 +7,4 @@ args = dict([('pred_PassengerId', 'on'), ('pred_Survived', 'on'),
 
 args
 for k, v in args.iteritems():
-    print(k, v)
+    logging.info(k, v)

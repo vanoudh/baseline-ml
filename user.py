@@ -1,4 +1,5 @@
 """Doc."""
+import logging
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -19,7 +20,7 @@ class User(UserMixin):
     def check_password(self, password):
         """Doc."""
         self.auth = check_password_hash(self.password_hash, password)
-        print('auth: {}'.format(self.auth))
+        logging.info('auth: {}'.format(self.auth))
         return self.auth
 
     @property

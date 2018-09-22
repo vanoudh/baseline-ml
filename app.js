@@ -2,185 +2,34 @@
 "use strict";
 
 var user_id = null;
-var job = null;
 var target = null;
+var result = null;
 var timer = null;
-var returnmessage = {null:'running', 0:'success', 1:'error'}
 
-function index_checked(usage) {
-  if (usage == 'predictor') return 3;
-  if (usage == 'target') return 4;
-  if (usage == 'ignored') return 2;
-  return -1;
-}
+$("#logout").hide()
+$("#run").hide()
+$("#feedback_ctn").hide()
+$("#upload_ctn").hide()
+$("#feedback_show").click(function(e) {$("#feedback_ctn").toggle();});
 
-function view_put_target() {
-  var e = $("#target")[0];
-  var cln = e.children[0].cloneNode(true);
-  e.innerHTML = null;
-  var j = 1;
-  var t = target == null ? {'---': '---'} : target;
-  for (var v in target) {
-    cln.children[0].innerText = j;
-    cln.children[1].innerText = v;
-    var i_checked = index_checked(target[v]);
-    for (var i=2; i<=4; i++) {
-      cln.children[i].children[0].name = 'radio' + j;
-      cln.children[i].children[0].checked = i==i_checked;
-    }
-    e.appendChild(cln);
-    cln = e.children[0].cloneNode(true);
-    j++;
-  }
-  document.getElementById("run").disabled = false;
-}
+$("#login").click(function(e) {
+  model_post_login();
+});
 
-function view_get_target() {
-  target = {};
-  var e = $("#target")[0];
-  for (var i=0; i<e.children.length; i++) {
-    var c = e.children[i];
-    var v = c.children[1].innerText;
-    if (v == '---') {
-      target = null;
-      return;
-    }
-    if (c.children[3].children[0].checked)
-      target[v] = 'predictor';
-    else if (c.children[4].children[0].checked)
-      target[v] = 'target';
-    else
-      target[v] = 'ignored';
-  }
-}
+$("#logout").click(function(e) {
+  model_post_logout();
+});
 
-function view_put_job() {
-  if (job)
-    for (var m in job)
-      if (m != 'done') {
-        var r = job[m];
-        if (typeof r == "number")
-          r = r.toFixed(3);
-        $("#" + m)[0].innerText = r;
-      }
-}
+$("#register").click(function(e) {
+  model_post_register();
+});
 
-function model_put_job() {
-  var p = {
-    type: 'PUT',
-    url: "/job/" + user_id,
-    dataType: "JSON",
-    data: job,
-    success: function(data) {
-      job = data;
-      view_put_job();
-    }
-  };
-  $.ajax(p);
-}
-
-function model_post_feedback() {
-  var p = {
-    type: 'POST',
-    url: "/feedback/" + $("#email-input")[0].value,
-    dataType: "JSON",
-    data: {'text': $("#text-input")[0].value},
-    success: function(data) {
-    }
-  };
-  $.ajax(p);
-}
-
-function model_get_job() {
-  var p = {
-    type: 'GET',
-    url: "/job/" + user_id,
-    dataType: "JSON",
-    success: function(data) {
-      console.log(data)
-      job = data;
-      view_put_job();
-    }
-  };
-  $.ajax(p);
-}
-
-function login_callback(data) {
-  console.log(data);
-  if (data.auth) {
-    user_id = data.user_id;
-    $("#login").prop('disabled', true);
-    $("#register").prop('disabled', true);
-    $("#email-input").prop('disabled', true);
-    $("#logout").prop('disabled', false);
-    $("#password-block").hide()
-    model_get_file();
-    timer = setInterval(model_get_job, 5000);
-  }
-  else
-    alert(data.message)
-}
-
-function logout_callback(data) {
-  console.log(data);
-  if (data.logout) {
-    user_id = null;
-    set_upload();
-    $("#login").prop('disabled', false);
-    $("#register").prop('disabled', false);
-    $("#email-input").prop('disabled', false);
-    $("#logout").prop('disabled', true);
-    $("#password-block").show()
-    clearInterval(timer);
-  }
-}
-
-function model_post_register(){
-  var p = {
-    type: 'POST',
-    url: "/register",
-    dataType: "JSON",
-    data: {
-      'email': $("#email-input")[0].value,
-      'password': $("#password-input")[0].value
-    },
-    success: function(data) {
-      login_callback(data);
-    }
-  };
-  $.ajax(p);
-}
-
-function model_post_login(){
-  var p = {
-    type: 'POST',
-    url: "/login",
-    dataType: "JSON",
-    data: {
-      'email': $("#email-input")[0].value,
-      'password': $("#password-input")[0].value
-    },
-    success: function(data) {
-      login_callback(data);
-    }
-  };
-  $.ajax(p);
-}
-
-function model_post_logout(){
-  var p = {
-    type: 'POST',
-    url: "/logout",
-    dataType: "JSON",
-    data: {
-      'email': $("#email-input")[0].value
-    },
-    success: function(data) {
-      logout_callback(data);
-    }
-  };
-  $.ajax(p);
-}
+$("#run").click(function(e) {
+  $("#run").hide();
+  $("#upload_ctn").hide();
+  view_get_target()
+  model_put_target();
+});
 
 function model_get_file(){
   var p = {
@@ -193,41 +42,8 @@ function model_get_file(){
       if (data == null)
         $("#file").text("you have no file yet");
       else {
-        $("#file").text(data.filename);
-        model_get_target()
+        $("#file").text(data.source_filename);
       }
-    }
-  };
-  $.ajax(p);
-}
-
-function model_get_target(){
-  var p = {
-    type: 'GET',
-    url: "/target/" + user_id,
-    dataType: "JSON",
-    success: function(data) {
-      console.log(data);
-      target = data;
-      view_put_target();
-      model_get_job();
-    }
-  };
-  $.ajax(p);
-}
-
-function model_put_target() {
-  console.log(target);
-  var p = {
-    type: 'PUT',
-    url: "/target/" + user_id,
-    dataType: "JSON",
-    data: target,
-    success: function(data) {
-      console.log(data);
-      job = {'done': 'starting'};
-      view_put_job();
-      model_put_job();
     }
   };
   $.ajax(p);
@@ -255,29 +71,208 @@ function set_upload() {
   }).prop('disabled', !$.support.fileInput)
       .parent().addClass($.support.fileInput ? undefined : 'disabled');
 }
-$("#login").click(function(e) {
-  model_post_login();
-});
-$("#register").click(function(e) {
-  model_post_register();
-});
-$("#feedback-show").click(function(e) {
-  $("#feedback-ctn").toggle(); 
-});
-$("#feedback-submit").click(function(e) {
-  model_post_feedback();
-  $("#feedback-ctn").hide();  
-});
-$("#logout").click(function(e) {
-  model_post_logout();
-});
-$("#get_target").click(function(e) {
-  model_get_target();
-});
-$("#run").click(function(e) {
-  job = null;
-  view_put_job();
-  view_get_target()
-  model_put_target();
-});
 
+function index_checked(usage) {
+  if (usage == 'predictor') return 3;
+  if (usage == 'target') return 4;
+  if (usage == 'ignored') return 2;
+  return -1;
+}
+
+function view_put_target() {
+  console.log('view_put_target');
+  console.log(target)
+  var e = $("#target")[0];
+  var cln = e.children[0].cloneNode(true);
+  e.innerHTML = null;
+  var j = 1;
+  var t = target == null ? {'---': '---'} : target;
+  console.log(t);
+  for (var v in t) {
+    cln.children[0].innerText = j;
+    cln.children[1].innerText = v;
+    var i_checked = index_checked(t[v]);
+    for (var i=2; i<=4; i++) {
+      cln.children[i].children[0].name = 'radio' + j;
+      cln.children[i].children[0].checked = i==i_checked;
+    }
+    e.appendChild(cln);
+    cln = e.children[0].cloneNode(true);
+    j++;
+  }
+  //marc
+  if (target)
+    if (result)
+      if (result.done)
+        $("#run").show();
+}
+
+function view_get_target() {
+  target = {};
+  var e = $("#target")[0];
+  for (var i=0; i<e.children.length; i++) {
+    var c = e.children[i];
+    var v = c.children[1].innerText;
+    if (v == '---') {
+      target = null;
+      return;
+    }
+    if (c.children[3].children[0].checked)
+      target[v] = 'predictor';
+    else if (c.children[4].children[0].checked)
+      target[v] = 'target';
+    else
+      target[v] = 'ignored';
+  }
+}
+
+function model_get_target(){
+  var p = {
+    type: 'GET',
+    url: "/target/" + user_id,
+    dataType: "JSON",
+    success: function(data) {
+      console.log('target');
+      console.log(data);
+      target = data;
+      view_put_target();
+    }
+  };
+  $.ajax(p);
+}
+
+function model_put_target() {
+  console.log(target);
+  var p = {
+    type: 'PUT',
+    url: "/target/" + user_id,
+    dataType: "JSON",
+    data: target,
+    success: function(data) {
+      console.log(data);
+      model_post_job();
+    }
+  };
+  $.ajax(p);
+}
+
+
+function model_post_job() {
+  var p = {
+    type: 'POST',
+    url: "/job/" + user_id,
+    dataType: "JSON",
+    data: {},
+    success: function(data) {
+      result = data;
+      view_put_result();
+      timer = setInterval(model_get_result, 5000);
+    }
+  };
+  $.ajax(p);
+}
+
+
+function view_put_result() {
+  if (result)
+    for (var m in result)
+      if (m != 'done') {
+        var r = result[m];
+        if (typeof r == "number")
+          r = r.toFixed(3);
+        $("#" + m)[0].innerText = r;
+      }
+}
+
+function model_get_result() {
+  var p = {
+    type: 'GET',
+    url: "/result/" + user_id,
+    dataType: "JSON",
+    success: function(data) {
+      console.log(data)
+      result = data;
+      view_put_result();
+      if (result.done) {
+        clearInterval(timer);
+        $("#upload_ctn").show();
+        if (target)
+          $("#run").show();
+      }
+    }
+  };
+  $.ajax(p);
+}
+
+function model_post_login(){
+  var p = {
+    type: 'POST',
+    url: "/login/" + $("#email_input")[0].value,
+    dataType: "JSON",
+    data: {
+      'email': $("#email_input")[0].value,
+      'password': $("#password_input")[0].value
+    },
+    success: function(data) {
+      login_callback(data);
+    }
+  };
+  $.ajax(p);
+}
+
+function model_post_logout() {
+  var p = {
+    type: 'POST',
+    url: "/logout/" + user_id,
+    dataType: "JSON",
+    data: {
+      'email': $("#email_input")[0].value
+    },
+    success: function(data) {
+      logout_callback(data);
+    }
+  };
+  $.ajax(p);
+}
+
+function model_post_register(){
+  var p = {
+    type: 'POST',
+    url: "/register/" + $("#email_input")[0].value, 
+    dataType: "JSON",
+    data: {
+      'email': $("#email_input")[0].value,
+      'password': $("#password_input")[0].value
+    },
+    success: function(data) {
+      login_callback(data);
+    }
+  };
+  $.ajax(p);
+}
+
+function login_callback(data) {
+  console.log(data);
+  if (data.auth) {
+    user_id = data.user_id;
+    $("#login").hide();
+    $("#logout").show();
+    $("#register").hide();
+    $("#email_input").prop('disabled', true);
+    $("#password_ctn").hide()
+    model_get_file();
+    model_get_target();
+    model_get_result();
+    timer = setInterval(model_get_result, 5000);
+  }
+  else
+    alert(data.message)
+}
+
+function logout_callback(data) {
+  console.log(data);
+  if (data.logout) {
+    // not smart but safer
+    location.reload();
+  }
+}

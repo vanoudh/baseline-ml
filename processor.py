@@ -2,12 +2,17 @@
 import os
 import time
 import json
-import pandas as pd
+import logging
 from subprocess import Popen
 from werkzeug.utils import secure_filename
 
+from utils import read_csv
 from storage_factory import ds, fs
 
+LOG_FOLDER = '.logs'
+
+if not os.path.isdir(LOG_FOLDER):
+    os.mkdir(LOG_FOLDER)
 
 MODEL_LIST = 'no-model linear-model forest-model auto-sklearn'.split()
 
@@ -28,57 +33,60 @@ class Processor:
 
     def upload(self, user_id, file):
         """Doc."""
-        filename = secure_filename(file.filename)
-        ds.put('file', user_id, {'filename': filename})
-        fs.save('dataset', user_id, file)
+        source_filename = secure_filename(file.filename)
+        filename = '-'.join(['data', user_id, source_filename])
+        ds.put('file', user_id, {'filename': filename, 'source_filename': source_filename})
+        fs.save(filename, file)
+        path = fs.get_path(filename)
         target = {}
-        path = fs.get_path('dataset', user_id)
-        df = pd.read_csv(path)
-        for c in df.columns:
-            target[c] = 'predictor'
-        self.set_target(user_id, target)
-        return json.dumps({'name': filename})
+        message = "{}"
+        try:
+            df = read_csv(path)
+            for c in df.columns:
+                target[c] = 'predictor'
+            self.set_target(user_id, target)
+        except Exception as e:
+            logging.warning(e)
+            message = "error while parsing {}"            
+        return json.dumps({'name': message.format(source_filename)})
 
     def get_target(self, user_id):
         """Doc."""
-        return ds.get('target', user_id)
+        r = ds.get('target', user_id)
+        return r
 
     def set_target(self, user_id, t):
         """Doc."""
         ds.put('target', user_id, t)
         return t
 
-    def run_job(self, user_id, model):
-        print('run {}'.format(model))
-        res = {'result': 'running...'}
-        ds.put('result-{}'.format(model), user_id, res)
+    def _run_job(self, user_id, model):
+        logging.info('run {}'.format(model))
+        ds.put('result-{}'.format(model), user_id, {'result': 'starting...'})
         cmd = "python automl_run.py {} {}".format(user_id, model)
-        job = Popen(cmd, shell=True)
-        time.sleep(1)
-        job.poll()
-        if job.returncode is not None:
-            if job.returncode >= 1:
-                res = {'result': 'job failed'}
-                ds.put('result-{}'.format(model), user_id, res)
-        print('rcode {}'.format(job.returncode))
+        fname_out = "{}/run-{}-{}.log".format(LOG_FOLDER, user_id, model)
+        with open(fname_out, "wb") as out:
+            job = Popen(cmd, shell=True, stdout=out)
+        logging.debug('rcode {}'.format(job.returncode))
     
-    def set_job(self, user_id, job):
+    def run_job(self, user_id, job):
         """Doc."""
         for m in MODEL_LIST:
-            self.run_job(user_id, m)
-        return self.get_job(user_id)
-
-    def get_job(self, user_id):
+            self._run_job(user_id, m)
+        return self.get_result(user_id)
+        
+    def get_result(self, user_id):
         """Doc."""
-        f = lambda m:ds.get('result-{}'.format(m), user_id)['result']
-        r = list(map(f , MODEL_LIST))
+
+        def getr(m):
+            r = ds.get('result-{}'.format(m), user_id)
+            if r is None:
+                return '----'
+            return r['result']
+
+        r = list(map(getr , MODEL_LIST))
         j = {}
         for m, rr in zip(MODEL_LIST, r):
             j[m] = rr
-        j['done'] = 'running...' not in r 
-        print(j)
+        j['done'] = ('starting...' not in r) and ('learning...' not in r)  
         return j
-
-    def get_result(self, user_id):
-        """Doc."""
-        return ds.get('result', user_id)

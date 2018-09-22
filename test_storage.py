@@ -1,5 +1,6 @@
 """Unit tests for storage."""
 
+import logging
 import pytest
 import secrets
 from .storage_factory_pytest import ds
@@ -23,7 +24,7 @@ def test1():
     assert r['PassengerId'] == 1
     assert r['Survived'] == 'target'
     assert r == js
-    print(r)
+    logging.info(r)
     ds.delete(kind, name)
     assert ds.get(kind, name) == None
 
@@ -41,7 +42,7 @@ def test2():
     r = ds.get(kind, name)
     assert r['Pclass']['a'] == 3
     assert r == js
-    print(r)
+    logging.info(r)
     ds.delete(kind, name)
     assert ds.get(kind, name) == None
 

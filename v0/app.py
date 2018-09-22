@@ -49,8 +49,8 @@ def validate(filename):
 
 @app.route('/run/<filename>')
 def run(filename):
-    print('---')
-    print(request.args)
+    logging.info('---')
+    logging.info(request.args)
     x_cols = [k[5:] for k in request.args if k.startswith('pred_')]
     y_cols = [k[5:] for k in request.args if k.startswith('targ_')]
     path = getpath(filename)

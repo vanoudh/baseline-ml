@@ -4,3 +4,4 @@
 .store_mock
 .pytest_cache
 .vscode
+.logs

@@ -119,7 +119,7 @@ def cross_val_score2(estimator, X, y=None, scoring=None,
         
     for train, test in cv:
         if verbose > 0:
-            print("cv %d started\n" % i )
+            logging.info("cv %d started\n" % i )
             
         new_estimator = clone(estimator)
         
@@ -143,9 +143,9 @@ def cross_val_score2(estimator, X, y=None, scoring=None,
 #            y_hat_proba[test,:] = pr_proba
         
         if verbose >0:
-            print("cv %d done!\n\n" % i)
+            logging.info("cv %d done!\n\n" % i)
         if verbose > 1:
-            print("score train : %2.2f%% , score test : %2.2f%%" % (100*score_train,100*score_test))
+            logging.info("score train : %2.2f%% , score test : %2.2f%%" % (100*score_train,100*score_test))
             
         all_scores.append((score_train, score_test,
                            nb_of_observations, time_of_fit))
@@ -153,14 +153,14 @@ def cross_val_score2(estimator, X, y=None, scoring=None,
         if early_stop:
             if pd.isnull(score_test) or pd.isnull(score_train):
                 if verbose:
-                    print("I'll stop cross validation now (NaNs)")
+                    logging.info("I'll stop cross validation now (NaNs)")
                 break
             
         if early_stop and i >= 3:
             all_score_train,all_score_test,__,__ = zip(*all_scores)
             if np.max(all_score_test) <= stopping_threshold:
                 if verbose:
-                    print("I'll stop cross validation now (bad perfs)")
+                    logging.info("I'll stop cross validation now (bad perfs)")
                 break
             
         i += 1

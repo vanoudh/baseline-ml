@@ -4,7 +4,7 @@ Created on Fri Nov 04 15:30:54 2016
 @author: mvanoudh
 """
 
-#import logging
+import os
 import pandas as pd
 import numpy as np
 import unicodedata
@@ -314,28 +314,18 @@ class PassThrought(BaseEstimator, TransformerMixin):
     def get_feature_names(self):
         return self.feature_names
    
-     
-#Just wanted to toss out the solution I am using:
-#
-#def check_output(X, ensure_index=None, ensure_columns=None):
-#    """
-#    Joins X with ensure_index's index or ensure_columns's columns when avaialble
-#    """
-#    if ensure_index is not None:
-#        if ensure_columns is not None:
-#            if type(ensure_index) is pd.DataFrame and type(ensure_columns) is pd.DataFrame:
-#                X = pd.DataFrame(X, index=ensure_index.index, columns=ensure_columns.columns)
-#        else:
-#            if type(ensure_index) is pd.DataFrame:
-#                X = pd.DataFrame(X, index=ensure_index.index)
-#    return X
-#I then create wrappers around sklearn's estimators that call this function on the output of transform e.g.,
-#
-#from sklearn.preprocessing import StandardScaler as _StandardScaler 
-#class StandardScaler(_StandardScaler):
-#    def transform(self, X):
-#        Xt = super(StandardScaler, self).transform(X)
-#        return check_output(Xt, ensure_index=X, ensure_columns=X)
+
+def read_csv(path):
+    _, extension = os.path.splitext(path)
+    if extension in 'gzip bz2 zip xz'.split():
+        compression = extension
+    else:
+        compression = 'infer'
+            
+    return pd.read_csv(path, 
+                       sep=None, 
+                       engine='python',
+                       compression=compression)
 
 
 if __name__ == "__main__":

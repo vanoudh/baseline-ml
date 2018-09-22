@@ -113,4 +113,4 @@ sklearn.metrics.scorer.SCORERS["log_loss2"] = log_loss_scorer2()
 #                    [.40, .60]])
 #
 #for level in [.2, 0.4, 0.6, 0.8, 0.9]:
-#    print(level, _score_at_proba(y_true, y_proba, level))
+#    logging.info(level, _score_at_proba(y_true, y_proba, level))
