@@ -7,13 +7,11 @@ var result = null;
 var timer = null;
 
 $("#logout").hide()
-$("#run").hide()
 $("#feedback_ctn").hide()
-$("#why_ctn").hide()
 $("#upload_ctn").hide()
+$("#run").hide()
 
 $("#feedback_show").click(function(e) {$("#feedback_ctn").toggle();});
-$("#why_show").click(function(e) {$("#why_ctn").toggle();});
 
 $("#login").click(function(e) {
   model_post_login();
@@ -43,7 +41,7 @@ function model_get_file(){
       console.log(data);
       set_upload();
       if (data == null)
-        $("#file").text("you have no file yet");
+        $("#file").text("You have no file yet");
       else {
         $("#file").text(data.source_filename);
       }
@@ -76,9 +74,9 @@ function set_upload() {
 }
 
 function index_checked(usage) {
-  if (usage == 'predictor') return 3;
-  if (usage == 'target') return 4;
-  if (usage == 'ignored') return 2;
+  if (usage == 'p') return 3;
+  if (usage == 't') return 4;
+  if (usage == 'i') return 2;
   return -1;
 }
 
@@ -89,12 +87,12 @@ function view_put_target() {
   var cln = e.children[0].cloneNode(true);
   e.innerHTML = null;
   var j = 1;
-  var t = target == null ? {'---': '---'} : target;
-  console.log(t);
-  for (var v in t) {
+  var tl = target == null ? ['---x'] : target.target.split(',');
+  console.log(tl);
+  for (var v in tl) {
     cln.children[0].innerText = j;
-    cln.children[1].innerText = v;
-    var i_checked = index_checked(t[v]);
+    cln.children[1].innerText = tl[v].slice(0, -1);
+    var i_checked = index_checked(tl[v].slice(-1));
     for (var i=2; i<=4; i++) {
       cln.children[i].children[0].name = 'radio' + j;
       cln.children[i].children[0].checked = i==i_checked;
@@ -111,7 +109,7 @@ function view_put_target() {
 }
 
 function view_get_target() {
-  target = {};
+  var tl = [];
   var e = $("#target")[0];
   for (var i=0; i<e.children.length; i++) {
     var c = e.children[i];
@@ -121,12 +119,13 @@ function view_get_target() {
       return;
     }
     if (c.children[3].children[0].checked)
-      target[v] = 'predictor';
+      tl[i] = v + 'p';
     else if (c.children[4].children[0].checked)
-      target[v] = 'target';
+      tl[i] = v + 't';
     else
-      target[v] = 'ignored';
+      tl[i] = v + 'i';
   }
+  target = {'target': tl.join(',')}
 }
 
 function model_get_target(){
@@ -181,8 +180,6 @@ function view_put_result() {
     for (var m in result)
       if (m != 'done') {
         var r = result[m];
-        if (typeof r == "number")
-          r = r.toFixed(3);
         $("#" + m)[0].innerText = r;
       }
 }

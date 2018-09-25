@@ -3,8 +3,19 @@
 ```shell
 docker build -t helloi .
 docker run helloi
-gcloud deploy app --version dev --quiet
+gcloud app deploy --version dev --quiet
 ```
 
+
+
 gcloud auth login
-export GOOGLE_CLOUD_PROJECT=machine-learning-market
+
+gcloud config set project xxx
+
+export GOOGLE_CLOUD_PROJECT=xxx
+
+gsutil mb gs://$GOOGLE_CLOUD_PROJECT$-media
+
+gcloud app deploy
+
+gcloud app logs tail -s default

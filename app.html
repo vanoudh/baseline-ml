@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
     <link rel="stylesheet" href="static/css/jquery.fileupload.css">
 
-    <title>MLB</title>
+    <title>Baseline ML</title>
     <style>
       .jumbotron {
           background-color: white;
@@ -17,34 +17,15 @@
     </style>
   </head>
   <body>
-
     <div class="container">
       <p>&nbsp;</p>
       <h1 class="display-4">Baseline ML</h1>
       <p class="lead">Upload your dataset - Choose your target - Get results !</p>
-      <!-- <p class="lead">
-        <a class="btn btn-primary" href="static/more.html" role="button">Learn more</a>
-      </p> -->
-      <button id="why_show" type="submit" class="btn btn-link">Why Baseline ML ?</button>
-      <button id="feedback_show" type="submit" class="btn btn-link">Feedback</button>
-      <span class="btn btn-link"><a href="static/tos.html" target="_blank">Terms of Service</a></span>
 
-      <div id="why_ctn" class="container">
-        <hr class="my-4">
-        <p>In data science as in innovation in general, it is a very good practice
-          to work in short iterations, building prototypes and simple products quickly
-          instead of spending months or years building the perfect product.
-        </p>
-        <p>Baseline ML helps you do that with machine learning models,
-           providing the first models (often called baseline models) in a few minutes.
-        </p>
-        <p>I expect Baseline ML to be primarily used by data scientist but I
-          hope it can also be a simple discovery tool for anyone trying to 
-          leverage machine learning on their data.
-        </p> 
-        <p>If you have any question please contact me at <a href='mailto:baseline-ml@googlegroups.com' target="_blank">baseline-ml@googlegroups.com</a>,
-          I'll be happy to help.</p>
-      </div>
+      <span class="btn btn-link"><a href="static/more.html#why" target="_blank">Why Baseline ML ?</a></span>
+      <span class="btn btn-link"><a href="static/more.html#how" target="_blank">How does it work ?</a></span>
+      <button id="feedback_show" type="submit" class="btn btn-link">Feedback</button>
+    </div>
 
       <div id="feedback_ctn" class="container">
         <hr class="my-4">
@@ -75,6 +56,7 @@
         <button id="login" type="submit" class="btn btn-primary">Log in</button>
         <button id="logout" type="submit" class="btn btn-primary">Log out</button>
         <button id="register" type="submit" class="btn btn-link">Register</button>
+        <span class="btn btn-link"><a href="static/tos.html" target="_blank">Terms of Service</a></span>
         <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
       </div>
     </div>
@@ -135,33 +117,13 @@
       <h3>Results</h3>
       <table class="table">
         <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Model</th>
-            <th scope="col">Result</th>
-          </tr>
+          <tr><th scope="col">#</th><th scope="col">Model</th><th scope="col">Result</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>no-model</td>
-            <td id="no-model">---</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>linear-model</td>
-            <td id="linear-model">---</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>forest-model</td>
-            <td id="forest-model">---</td>
-          </tr>
-          <tr>
-            <th scope="row">4</th>
-            <td><a href="https://automl.github.io/auto-sklearn/stable" target="_blank">auto-sklearn</a></td>
-            <td id="auto-sklearn">---</td>
-          </tr>
+          <tr><th scope="row">1</th><td>nomodel</td><td id="nomodel">---</td></tr>
+          <tr><th scope="row">2</th><td>linear</td><td id="linear">---</td></tr>
+          <tr><th scope="row">3</th><td>tree</td><td id="tree">---</td></tr>
+          <tr><th scope="row">4</th><td>forest</td><td id="forest">---</td></tr>
         </tbody>
       </table>
     </div>

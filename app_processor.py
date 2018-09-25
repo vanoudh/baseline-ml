@@ -9,12 +9,12 @@ from werkzeug.utils import secure_filename
 from utils import read_csv
 from storage_factory import ds, fs
 
-LOG_FOLDER = '.logs'
+# LOG_FOLDER = '.logs'
 
-if not os.path.isdir(LOG_FOLDER):
-    os.mkdir(LOG_FOLDER)
+# if not os.path.isdir(LOG_FOLDER):
+#     os.mkdir(LOG_FOLDER)
 
-MODEL_LIST = 'no-model linear-model forest-model auto-sklearn'.split()
+MODEL_LIST = 'nomodel linear tree forest'.split()
 
 
 class Processor:
@@ -38,13 +38,13 @@ class Processor:
         ds.put('file', user_id, {'filename': filename, 'source_filename': source_filename})
         fs.save(filename, file)
         path = fs.get_path(filename)
-        target = {}
+        vl = []
         message = "{}"
         try:
             df = read_csv(path)
             for c in df.columns:
-                target[c] = 'predictor'
-            self.set_target(user_id, target)
+                vl.append(c + 'p')
+            self.set_target(user_id, {'target':','.join(vl)})
         except Exception as e:
             logging.warning(e)
             message = "error while parsing {}"            
@@ -64,9 +64,9 @@ class Processor:
         logging.info('run {}'.format(model))
         ds.put('result-{}'.format(model), user_id, {'result': 'starting...'})
         cmd = "python automl_run.py {} {}".format(user_id, model)
-        fname_out = "{}/run-{}-{}.log".format(LOG_FOLDER, user_id, model)
-        with open(fname_out, "wb") as out:
-            job = Popen(cmd, shell=True, stdout=out)
+        # fname_out = "{}/run-{}-{}.log".format(LOG_FOLDER, user_id, model)
+        # with open(fname_out, "wb") as out:
+        job = Popen(cmd, shell=True)
         logging.debug('rcode {}'.format(job.returncode))
     
     def run_job(self, user_id, job):

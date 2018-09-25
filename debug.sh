@@ -1,2 +1,2 @@
-export LOCAL=yes
+export LOCAL=no
 python app_run.py

@@ -5,18 +5,16 @@ import time
 from flask import Flask, request, send_from_directory, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user
 import secrets
-from multiprocessing import Pool
 
-from processor import Processor
+from app_processor import Processor
 from email_checker import check_email
 from user import User
 from storage_factory import ds
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
-app.config['JSON_SORT_KEYS'] = False
 login_manager = LoginManager()
 login_manager.init_app(app)
 processor = Processor()
@@ -93,7 +91,7 @@ def _login(user_id):
     password = request.form['password']
     user = get_user_from_storage(user_id)
     if user is None or not user.check_password(password):
-        return jsonify({'message': 'login failed'})
+        return jsonify({'message': 'Login failed'})
     save_user(user)
     login_user(user)
     return jsonify({'user_id': user_id, 'auth': user.is_authenticated})
@@ -115,9 +113,9 @@ def _register(user_id):
     logging.debug(user_id)
     user = get_user_from_storage(user_id)
     if user is not None:
-        return jsonify({'message': 'user already registered'})
+        return jsonify({'message': 'User already registered'})
     if not check_email(user_id):
-        return jsonify({'message': 'invalid email'})
+        return jsonify({'message': 'Invalid email'})
     user = User(user_id)
     user.set_password(password)
     user.check_password(password)
@@ -156,6 +154,7 @@ def _target(user_id):
 @login_required
 def _job(user_id):
     """Doc."""
+    print(request.form)
     r = processor.run_job(user_id, request.form.to_dict())
     return jsonify(r)
 

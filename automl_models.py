@@ -36,6 +36,13 @@ _linear_model = [
     })
 ]
 
+_tree_model = [
+    (DecisionTreeRegressor(), True, True, 10, {
+    }),
+    (DecisionTreeClassifier(), False, True, 10, {
+    })
+]
+
 _forest_model = [
     (RandomForestRegressor(), True, True, 10, {
     }),
@@ -45,11 +52,13 @@ _forest_model = [
 
 
 def model_factory(engine):
-    if engine == 'no-model':
+    if engine == 'nomodel':
         return _no_model
-    if engine == 'linear-model':
+    if engine == 'linear':
         return _linear_model
-    if engine == 'forest-model':
+    if engine == 'tree':
+        return _tree_model
+    if engine == 'forest':
         return _forest_model
     raise ValueError('unknown engine :{}'.format(engine))
 
