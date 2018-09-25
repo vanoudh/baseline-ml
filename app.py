@@ -21,11 +21,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 processor = Processor()
 
-LOG_FOLDER = '.logs'
-
-if not os.path.isdir(LOG_FOLDER):
-    os.mkdir(LOG_FOLDER)
-
 
 """ Utils """
 

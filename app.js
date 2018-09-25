@@ -9,8 +9,11 @@ var timer = null;
 $("#logout").hide()
 $("#run").hide()
 $("#feedback_ctn").hide()
+$("#why_ctn").hide()
 $("#upload_ctn").hide()
+
 $("#feedback_show").click(function(e) {$("#feedback_ctn").toggle();});
+$("#why_show").click(function(e) {$("#why_ctn").toggle();});
 
 $("#login").click(function(e) {
   model_post_login();
