@@ -4,6 +4,7 @@ import json
 import logging
 from google.cloud import storage
 from google.cloud import datastore
+import secrets
 
 STORAGE_FOLDER = '.store_cache'
 S = '-'
@@ -32,7 +33,8 @@ class FileStore:
     def get_path(self, filename):
         """Doc."""
         blob = bucket.blob(filename)
-        path = os.path.join(STORAGE_FOLDER, filename)
+        temp = secrets.token_hex(4//2)
+        path = os.path.join(STORAGE_FOLDER, temp, filename)
         blob.download_to_filename(path)
         return path
 

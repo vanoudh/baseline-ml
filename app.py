@@ -2,7 +2,7 @@
 import os
 import logging
 import time
-from flask import Flask, request, send_from_directory, jsonify
+from flask import Flask, request, send_from_directory, jsonify, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user
 import secrets
 
@@ -59,10 +59,12 @@ def load_user(user_id):
 
 """ Definition of routes. """
 
-
 @app.route('/')
 def _home():
     """Doc."""
+    # if request.url.startswith('http://baseline-ml.appspot.com'):
+    #     url = request.url.replace('http', 'https', 1)
+    #     return redirect(url, code=302)
     return send_from_directory('.', 'app.html')
 
 

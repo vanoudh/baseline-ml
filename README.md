@@ -19,3 +19,6 @@ gsutil mb gs://$GOOGLE_CLOUD_PROJECT$-media
 gcloud app deploy
 
 gcloud app logs tail -s default
+
+
+https://baseline-ml.appspot.com/?utm_source=marc_test&utm_medium=referral

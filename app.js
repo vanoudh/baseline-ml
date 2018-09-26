@@ -11,21 +11,28 @@ $("#feedback_ctn").hide()
 $("#upload_ctn").hide()
 $("#run").hide()
 
-$("#feedback_show").click(function(e) {$("#feedback_ctn").toggle();});
+$("#feedback_show").click(function(e) {
+  gtag('event', 'screen_view', {'screen_name': 'feedback'});
+  $("#feedback_ctn").toggle();})
+;
 
 $("#login").click(function(e) {
+  gtag('event', 'login', {'method': 'email'});
   model_post_login();
 });
 
 $("#logout").click(function(e) {
+  gtag('event', 'logout');
   model_post_logout();
 });
 
 $("#register").click(function(e) {
+  gtag('event', 'sign_up', {'method': 'email'});
   model_post_register();
 });
 
 $("#run").click(function(e) {
+  gtag('event', 'run');
   $("#run").hide();
   $("#upload_ctn").hide();
   view_get_target()
@@ -59,7 +66,8 @@ function set_upload() {
           // data.context = $('<p/>').text('uploading...').appendTo('#file');
           data.context = $('#file').text('uploading...');
           data.submit();
-      },
+          gtag('event', 'upload');
+        },
       done: function (e, data) {
           var fname = data.result['name'];
           data.context.text(fname);
@@ -101,7 +109,6 @@ function view_put_target() {
     cln = e.children[0].cloneNode(true);
     j++;
   }
-  //marc
   if (target)
     if (result)
       if (result.done)
