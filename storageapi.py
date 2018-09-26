@@ -33,8 +33,8 @@ class FileStore:
     def get_path(self, filename):
         """Doc."""
         blob = bucket.blob(filename)
-        temp = secrets.token_hex(4//2)
-        path = os.path.join(STORAGE_FOLDER, temp, filename)
+        sec = secrets.token_hex(4//2)
+        path = os.path.join(STORAGE_FOLDER, sec + filename)
         blob.download_to_filename(path)
         return path
 

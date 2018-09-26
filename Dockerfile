@@ -3,6 +3,9 @@ FROM docker.io/vanoudh/python-ml
 # Add files
 ADD . .
 
+ENV GOOGLE_CLOUD_PROJECT baseline-ml
+ENV GOOGLE_APPLICATION_CREDENTIALS baseline-ml-key.json
+
 # Install
 RUN pip3 install flask \
     flask-login \
