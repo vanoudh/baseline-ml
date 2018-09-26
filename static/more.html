@@ -14,6 +14,15 @@
           margin: 100;
       }
     </style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-126501644-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+  
+        gtag('config', 'UA-126501644-1');
+    </script>
   </head>
   <body>
     <h2 id="why">Why Baseline ML ?</h2>
@@ -60,8 +69,8 @@
     </p>
     <p>Finally you simply press <b>run</b> and wait for the results. Baseline ML will
       take the first 80% of your data to try a few baseline models.
-      "nomodel" is barely a model, it predicts the average or most 
-      frequent value of the target, ignoring the other variables.
+      The model "zero" is barely a model, it uses the average or most 
+      frequent value of the target as prediction, ignoring the other variables.
       It is still useful as a baseline, especially when you are trying to
       predict a rare event.
       "linear", "tree", and "forest" are classic models with a little

@@ -52,7 +52,7 @@ _forest_model = [
 
 
 def model_factory(engine):
-    if engine == 'nomodel':
+    if engine == 'zero':
         return _no_model
     if engine == 'linear':
         return _linear_model

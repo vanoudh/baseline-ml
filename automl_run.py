@@ -28,7 +28,7 @@ def run(user_id, model):
     target = ds.get('target', user_id)['target'].split(',')
     path = fs.get_path(filename)
 
-    print('target', target)
+    # print('target', target)
 
     df = read_csv(path)
     if model == 'auto-sklearn':
@@ -39,8 +39,8 @@ def run(user_id, model):
     predictors = [v[0:-1] for v in target if v[-1] == 'p']
     targets = [v[0:-1] for v in target if v[-1] == 't']
 
-    print('pred', predictors)
-    print('targ', targets)
+    # print('pred', predictors)
+    # print('targ', targets)
 
     if len(predictors) == 0:
         raise ValueError('expecting at least one predictor')

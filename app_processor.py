@@ -14,7 +14,7 @@ from storage_factory import ds, fs
 # if not os.path.isdir(LOG_FOLDER):
 #     os.mkdir(LOG_FOLDER)
 
-MODEL_LIST = 'nomodel linear tree forest'.split()
+MODEL_LIST = 'zero linear tree forest'.split()
 
 
 class Processor:
