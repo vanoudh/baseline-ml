@@ -16,7 +16,7 @@ export GOOGLE_CLOUD_PROJECT=baseline-ml
 
 gsutil mb gs://$GOOGLE_CLOUD_PROJECT$-media
 
-gcloud app deploy
+gcloud app deploy --no-promote
 
 gcloud app logs tail -s default
 

@@ -123,6 +123,11 @@ def _register(user_id):
     user.check_password(password)
     save_user(user)
     login_user(user)
+    user_info = {
+        'company': request.form['company'],
+        'job_title': request.form['job_title']
+    }
+    ds.put('userinfo', user_id, user_info)
     return jsonify({'user_id': user_id, 'auth': user.is_authenticated})
 
 

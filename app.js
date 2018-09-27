@@ -6,15 +6,19 @@ var target = null;
 var result = null;
 var timer = null;
 
-$("#logout").hide()
-$("#feedback_ctn").hide()
-$("#upload_ctn").hide()
-$("#run").hide()
+var email_regex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i);
+
+$("#feedback_ctn").hide();
+$(".alert").hide();
+$("#register_ctn").hide();
+$("#logout").hide();
+$("#upload_ctn").hide();
+$("#run").hide();
 
 $("#feedback_show").click(function(e) {
   gtag('event', 'screen_view', {'screen_name': 'feedback'});
-  $("#feedback_ctn").toggle();})
-;
+  $("#feedback_ctn").toggle();
+});
 
 $("#login").click(function(e) {
   gtag('event', 'login', {'method': 'email'});
@@ -27,6 +31,13 @@ $("#logout").click(function(e) {
 });
 
 $("#register").click(function(e) {
+  $("#register_ctn").show();
+  $('#login').hide();
+  $('#logout').hide();
+  $('#register').hide();
+});
+
+$("#register_confirm").click(function(e) {
   gtag('event', 'sign_up', {'method': 'email'});
   model_post_register();
 });
@@ -58,7 +69,7 @@ function model_get_file(){
 }
 
 function set_upload() {
-  console.log(user_id);
+  // console.log(user_id);
   $('#fileupload').fileupload({
       url: '/upload/' + user_id,
       dataType: 'json',
@@ -69,8 +80,11 @@ function set_upload() {
           gtag('event', 'upload');
         },
       done: function (e, data) {
+          console.log(data);
           var fname = data.result['name'];
           data.context.text(fname);
+          result = null;
+          view_put_result();
           model_get_target();
       },
       progressall: function (e, data) {
@@ -89,14 +103,12 @@ function index_checked(usage) {
 }
 
 function view_put_target() {
-  console.log('view_put_target');
-  console.log(target)
+  // console.log(target)
   var e = $("#target")[0];
   var cln = e.children[0].cloneNode(true);
   e.innerHTML = null;
   var j = 1;
   var tl = target == null ? ['---x'] : target.target.split(',');
-  console.log(tl);
   for (var v in tl) {
     cln.children[0].innerText = j;
     cln.children[1].innerText = tl[v].slice(0, -1);
@@ -141,7 +153,6 @@ function model_get_target(){
     url: "/target/" + user_id,
     dataType: "JSON",
     success: function(data) {
-      console.log('target');
       console.log(data);
       target = data;
       view_put_target();
@@ -151,7 +162,7 @@ function model_get_target(){
 }
 
 function model_put_target() {
-  console.log(target);
+  // console.log(target);
   var p = {
     type: 'PUT',
     url: "/target/" + user_id,
@@ -173,6 +184,7 @@ function model_post_job() {
     dataType: "JSON",
     data: {},
     success: function(data) {
+      console.log(data);
       result = data;
       view_put_result();
       timer = setInterval(model_get_result, 5000);
@@ -181,14 +193,11 @@ function model_post_job() {
   $.ajax(p);
 }
 
-
 function view_put_result() {
-  if (result)
-    for (var m in result)
-      if (m != 'done') {
-        var r = result[m];
-        $("#" + m)[0].innerText = r;
-      }
+  var r = result == null ? {'zero': '---', 'linear': '---', 'tree': '---', 'forest': '---', } : result;
+  for (var m in r)
+    if (m != 'done')
+      $("#" + m)[0].innerText = r[m];
 }
 
 function model_get_result() {
@@ -211,18 +220,34 @@ function model_get_result() {
   $.ajax(p);
 }
 
-function model_post_login(){
+function myalert(msg) {
+  $("#user_alert_text").text(msg);
+  $(".alert").show();
+}
+
+function check_email_password(email, password) {
+  if (!email_regex.test(email)) {
+    myalert('Invalid email');
+    return false;
+  }
+  if (password.length < 8) {
+    myalert('Password is too short');
+    return false;
+  }
+  return true;
+}
+
+function model_post_login() {
+  var email = $("#email_input")[0].value;
+  var password = $("#password_input")[0].value;
+  if (!check_email_password(email, password))
+    return;
   var p = {
     type: 'POST',
-    url: "/login/" + $("#email_input")[0].value,
+    url: "/login/" + email,
     dataType: "JSON",
-    data: {
-      'email': $("#email_input")[0].value,
-      'password': $("#password_input")[0].value
-    },
-    success: function(data) {
-      login_callback(data);
-    }
+    data: { 'email': email, 'password': password },
+    success: function(data) { login_callback(data); }
   };
   $.ajax(p);
 }
@@ -232,28 +257,25 @@ function model_post_logout() {
     type: 'POST',
     url: "/logout/" + user_id,
     dataType: "JSON",
-    data: {
-      'email': $("#email_input")[0].value
-    },
-    success: function(data) {
-      logout_callback(data);
-    }
+    data: { 'email': $("#email_input")[0].value },
+    success: function(data) { logout_callback(data); }
   };
   $.ajax(p);
 }
 
-function model_post_register(){
+function model_post_register() {
+  var email = $("#email_input")[0].value;
+  var password = $("#password_input")[0].value;
+  var company = $("#company_input")[0].value;
+  var job_title = $("#job_title_input")[0].value;
+  if (!check_email_password(email, password))
+      return;
   var p = {
     type: 'POST',
-    url: "/register/" + $("#email_input")[0].value, 
+    url: "/register/" + email, 
     dataType: "JSON",
-    data: {
-      'email': $("#email_input")[0].value,
-      'password': $("#password_input")[0].value
-    },
-    success: function(data) {
-      login_callback(data);
-    }
+    data: { 'email': email, 'password': password, 'company': company, 'job_title': job_title },
+    success: function(data) { login_callback(data); }
   };
   $.ajax(p);
 }
@@ -262,18 +284,19 @@ function login_callback(data) {
   console.log(data);
   if (data.auth) {
     user_id = data.user_id;
+    $("#email_input").prop('disabled', true);
+    $("#password_ctn").hide();
+    $("#register_ctn").hide();
     $("#login").hide();
     $("#logout").show();
     $("#register").hide();
-    $("#email_input").prop('disabled', true);
-    $("#password_ctn").hide()
     model_get_file();
     model_get_target();
     model_get_result();
     timer = setInterval(model_get_result, 5000);
   }
   else
-    alert(data.message)
+    myalert(data.message)
 }
 
 function logout_callback(data) {
