@@ -10,8 +10,10 @@ var email_regex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i)
 
 $("#feedback_ctn").hide();
 $(".alert").hide();
+//login
 $("#register_ctn").hide();
 $("#logout").hide();
+$("#delete").hide();
 $("#upload_ctn").hide();
 $("#run").hide();
 
@@ -27,7 +29,12 @@ $("#login").click(function(e) {
 
 $("#logout").click(function(e) {
   gtag('event', 'logout');
-  model_post_logout();
+  model_post_logout('logout');
+});
+
+$("#delete").click(function(e) {
+  gtag('event', 'delete');
+  model_post_logout('delete');
 });
 
 $("#register").click(function(e) {
@@ -95,35 +102,31 @@ function set_upload() {
       .parent().addClass($.support.fileInput ? undefined : 'disabled');
 }
 
-function index_checked(usage) {
-  if (usage == 'p') return 3;
-  if (usage == 't') return 4;
-  if (usage == 'i') return 2;
-  return -1;
-}
+const index_type = 'ipt';
 
 function view_put_target() {
   // console.log(target)
   var e = $("#target")[0];
   var cln = e.children[0].cloneNode(true);
   e.innerHTML = null;
-  var j = 1;
+  var i = 1;
   var tl = target == null ? ['---x'] : target.target.split(',');
   for (var v in tl) {
-    cln.children[0].innerText = j;
-    cln.children[1].innerText = tl[v].slice(0, -1);
-    var i_checked = index_checked(tl[v].slice(-1));
-    for (var i=2; i<=4; i++) {
-      cln.children[i].children[0].name = 'radio' + j;
-      cln.children[i].children[0].checked = i==i_checked;
+    var varname = tl[v].slice(0, -1);
+    var vartype = tl[v].slice(-1);
+    cln.children[0].innerText = i;
+    cln.children[1].innerText = varname;
+    for (var j=2; j<=4; j++) {
+      cln.children[j].children[0].name = 'radio' + i;
+      cln.children[j].children[0].checked = index_type[j-2] == vartype;
+      cln.children[j].children[0].id = varname + index_type[j-2];
     }
     e.appendChild(cln);
     cln = e.children[0].cloneNode(true);
-    j++;
+    i++;
   }
   if (target)
-    if (result)
-      if (result.done)
+    if (result == null || result.done)
         $("#run").show();
 }
 
@@ -231,7 +234,7 @@ function check_email_password(email, password) {
     return false;
   }
   if (password.length < 8) {
-    myalert('Password is too short');
+    myalert('Password should be at least 8 characters');
     return false;
   }
   return true;
@@ -252,12 +255,12 @@ function model_post_login() {
   $.ajax(p);
 }
 
-function model_post_logout() {
+function model_post_logout(logout_option) {
   var p = {
     type: 'POST',
     url: "/logout/" + user_id,
     dataType: "JSON",
-    data: { 'email': $("#email_input")[0].value },
+    data: { 'email': $("#email_input")[0].value, 'logout_option': logout_option },
     success: function(data) { logout_callback(data); }
   };
   $.ajax(p);
@@ -283,12 +286,14 @@ function model_post_register() {
 function login_callback(data) {
   console.log(data);
   if (data.auth) {
+    $('.alert').hide();
     user_id = data.user_id;
     $("#email_input").prop('disabled', true);
     $("#password_ctn").hide();
     $("#register_ctn").hide();
     $("#login").hide();
     $("#logout").show();
+    $("#delete").show();
     $("#register").hide();
     model_get_file();
     model_get_target();

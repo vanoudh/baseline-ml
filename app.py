@@ -60,7 +60,7 @@ def load_user(user_id):
 """ Definition of routes. """
 
 @app.route('/')
-def _home():
+def route_home():
     """Doc."""
     # if request.url.startswith('http://baseline-ml.appspot.com'):
     #     url = request.url.replace('http', 'https', 1)
@@ -69,25 +69,25 @@ def _home():
 
 
 @app.route('/app.js')
-def _js():
+def route_js():
     """Doc."""
     return send_from_directory('.', 'app.js')
 
 
 @app.route('/favicon.ico')
-def _favicon():
+def route_favicon():
     """Doc."""
     return send_from_directory('.', 'favicon.ico')
 
 
 @app.route('/version')
-def _version():
+def route_version():
     """Doc."""
     return jsonify({'version': 0})
 
 
 @app.route('/login/<string:user_id>', methods=['POST'])
-def _login(user_id):
+def route_login(user_id):
     """Doc."""
     user_id = request.form['email']
     password = request.form['password']
@@ -101,14 +101,19 @@ def _login(user_id):
 
 @app.route('/logout/<string:user_id>', methods=['POST'])
 @login_required
-def _logout(user_id):
+def route_logout(user_id):
     """Doc."""
     logout_user()
+    print(request.form)
+    if request.form['logout_option'] == 'delete':
+        logging.info('deleting account for {}'.format(user_id))
+        for kind in 'user target file result-zero result-linear result-tree result-forest'.split():
+            ds.delete(kind, user_id)
     return jsonify({'logout': True})
 
 
 @app.route('/register/<string:user_id>', methods=['POST'])
-def _register(user_id):
+def route_register(user_id):
     """Doc."""
     user_id = request.form['email']
     password = request.form['password']
@@ -133,14 +138,14 @@ def _register(user_id):
 
 @app.route('/user_file/<string:user_id>')
 @login_required
-def _user_file(user_id):
+def route_user_file(user_id):
     """Doc."""
     return jsonify(processor.get_file(user_id))
 
 
 @app.route('/upload/<string:user_id>', methods=['POST'])
 @login_required
-def _upload(user_id):
+def route_upload(user_id):
     """Doc."""
     file = request.files['files[]']
     return processor.upload(user_id, file)
@@ -148,7 +153,7 @@ def _upload(user_id):
 
 @app.route('/target/<string:user_id>', methods=['GET', 'PUT'])
 @login_required
-def _target(user_id):
+def route_target(user_id):
     """Doc."""
     if request.method == 'GET':
         r = processor.get_target(user_id)
@@ -159,7 +164,7 @@ def _target(user_id):
 
 @app.route('/job/<string:user_id>', methods=['POST'])
 @login_required
-def _job(user_id):
+def route_job(user_id):
     """Doc."""
     print(request.form)
     r = processor.run_job(user_id, request.form.to_dict())
@@ -168,7 +173,7 @@ def _job(user_id):
 
 @app.route('/result/<string:user_id>', methods=['GET'])
 @login_required
-def _result(user_id):
+def route_result(user_id):
     """Doc."""
     r = processor.get_result(user_id)
     return jsonify(r)

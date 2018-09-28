@@ -69,6 +69,6 @@ class DocStore:
 
     def delete(self, kind, name):
         """Doc."""
-        return dc.delete(self._key(kind, name))
+        dc.delete(self._key(kind, name))
 
         

@@ -54,4 +54,7 @@ class DocStore:
     def delete(self, kind, name):
         """Doc."""
         path = self._get_path(kind, name)
-        return os.remove(path) 
+        try:
+            os.remove(path)
+        except OSError:
+            pass

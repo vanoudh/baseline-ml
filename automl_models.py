@@ -38,15 +38,19 @@ _linear_model = [
 
 _tree_model = [
     (DecisionTreeRegressor(), True, True, 10, {
+        'mo__random_state': (0, )
     }),
     (DecisionTreeClassifier(), False, True, 10, {
+        'mo__random_state': (0, )
     })
 ]
 
 _forest_model = [
     (RandomForestRegressor(), True, True, 10, {
+        'mo__random_state': (0, )
     }),
     (RandomForestClassifier(), False, True, 10, {
+        'mo__random_state': (0, )
     })
 ]
 
