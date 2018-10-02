@@ -1,3 +1,4 @@
+console.log("wadell");
 
 "use strict";
 
@@ -5,39 +6,54 @@ var user_id = null;
 var target = null;
 var result = null;
 var timer = null;
+var run_clicked = false;
 
-var email_regex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i);
+const MODEL_LIST = 'zero linear tree forest'.split(' ');
+
+const email_regex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i);
 
 $("#feedback_ctn").hide();
 $(".alert").hide();
-//login
 $("#register_ctn").hide();
 $("#logout").hide();
 $("#delete").hide();
 $("#upload_ctn").hide();
 $("#run").hide();
 
+function track_page(title) {
+  gtag('config', 'UA-126501644-1', {
+    'page_title': 'API - ' + title, 
+    'page_path': '/' + title.toLowerCase()
+  });
+}
+
+function track_event(action, category, label, value) {
+  gtag('event', action, {
+    'event_category': category,
+    'event_label': label,
+    'value': value
+  });
+}
+
 $("#feedback_show").click(function(e) {
-  gtag('event', 'screen_view', {'screen_name': 'feedback'});
+  track_page('Feedback');
   $("#feedback_ctn").toggle();
 });
 
 $("#login").click(function(e) {
-  gtag('event', 'login', {'method': 'email'});
   model_post_login();
 });
 
 $("#logout").click(function(e) {
-  gtag('event', 'logout');
   model_post_logout('logout');
 });
 
 $("#delete").click(function(e) {
-  gtag('event', 'delete');
   model_post_logout('delete');
 });
 
 $("#register").click(function(e) {
+  track_page('SignUp');
   $("#register_ctn").show();
   $('#login').hide();
   $('#logout').hide();
@@ -45,12 +61,12 @@ $("#register").click(function(e) {
 });
 
 $("#register_confirm").click(function(e) {
-  gtag('event', 'sign_up', {'method': 'email'});
   model_post_register();
 });
 
 $("#run").click(function(e) {
-  gtag('event', 'run');
+  run_clicked = true;
+  track_page('Run');
   $("#run").hide();
   $("#upload_ctn").hide();
   view_get_target()
@@ -65,47 +81,42 @@ function model_get_file(){
     success: function(data) {
       console.log(data);
       set_upload();
-      if (data == null)
-        $("#file").text("You have no file yet");
-      else {
-        $("#file").text(data.source_filename);
-      }
+      var txt = data == null ? "You have no file yet" : data.source_filename;
+      $("#file").text(txt);
     }
   };
   $.ajax(p);
 }
 
 function set_upload() {
-  // console.log(user_id);
-  $('#fileupload').fileupload({
-      url: '/upload/' + user_id,
-      dataType: 'json',
-      add: function (e, data) {
-          // data.context = $('<p/>').text('uploading...').appendTo('#file');
-          data.context = $('#file').text('uploading...');
-          data.submit();
-          gtag('event', 'upload');
-        },
-      done: function (e, data) {
-          console.log(data);
-          var fname = data.result['name'];
-          data.context.text(fname);
-          result = null;
-          view_put_result();
-          model_get_target();
+  var p = {
+    url: '/upload/' + user_id,
+    dataType: 'json',
+    add: function (e, data) {
+        // data.context = $('<p/>').text('uploading...').appendTo('#file');
+        data.context = $('#file').text('uploading...');
+        data.submit();
+        track_page('Upload');
       },
-      progressall: function (e, data) {
-          var progress = parseInt(data.loaded / data.total * 100, 10);
-          $('#progress .progress-bar').css('width', progress + '%');
-      }
-  }).prop('disabled', !$.support.fileInput)
-      .parent().addClass($.support.fileInput ? undefined : 'disabled');
+    done: function (e, data) {
+        console.log(data);
+        var fname = data.result['name'];
+        data.context.text(fname);
+        model_get_target();
+    },
+    progressall: function (e, data) {
+        var progress = parseInt(data.loaded / data.total * 100, 10);
+        $('#progress .progress-bar').css('width', progress + '%');
+    }
+  }
+  $('#fileupload').fileupload(p)
+    .prop('disabled', !$.support.fileInput)
+    .parent().addClass($.support.fileInput ? undefined : 'disabled');
 }
 
 const index_type = 'ipt';
 
 function view_put_target() {
-  // console.log(target)
   var e = $("#target")[0];
   var cln = e.children[0].cloneNode(true);
   e.innerHTML = null;
@@ -125,9 +136,6 @@ function view_put_target() {
     cln = e.children[0].cloneNode(true);
     i++;
   }
-  if (target)
-    if (result == null || result.done)
-        $("#run").show();
 }
 
 function view_get_target() {
@@ -159,13 +167,14 @@ function model_get_target(){
       console.log(data);
       target = data;
       view_put_target();
+      result = null;
+      view_put_result();
     }
   };
   $.ajax(p);
 }
 
 function model_put_target() {
-  // console.log(target);
   var p = {
     type: 'PUT',
     url: "/target/" + user_id,
@@ -179,7 +188,6 @@ function model_put_target() {
   $.ajax(p);
 }
 
-
 function model_post_job() {
   var p = {
     type: 'POST',
@@ -190,17 +198,52 @@ function model_post_job() {
       console.log(data);
       result = data;
       view_put_result();
-      timer = setInterval(model_get_result, 5000);
     }
   };
   $.ajax(p);
 }
 
 function view_put_result() {
-  var r = result == null ? {'zero': '---', 'linear': '---', 'tree': '---', 'forest': '---', } : result;
-  for (var m in r)
-    if (m != 'done')
-      $("#" + m)[0].innerText = r[m];
+  var status_count = {'ok': 0, 'error': 0, 'running': 0};
+  for (var i in MODEL_LIST) {
+    var m = MODEL_LIST[i];
+    var v = '---';
+    if (result != null) {
+      var r = result[m];
+      if (r != null) {
+        v = r.value;
+        status_count[r.status]++;
+        if (r.status == 'error') {
+          track_event('ml_error', 'error', v);
+        }  
+      }
+    }
+    $("#" + m)[0].innerText = v;
+  }
+  var running = status_count['running'] > 0;
+  if (running) {
+    $("#run").hide();
+    $("#upload_ctn").hide();
+    if (!timer)
+      timer = setInterval(model_get_result, 5000);
+  }
+  else {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (run_clicked) {
+      track_page('Result');
+      if (status_count['ok'] == 4)
+        track_page('ResultOk');
+      run_clicked = false;
+    }
+    $("#upload_ctn").show();
+    if (target)
+      $("#run").show();
+  }
+  if (result && result['score_desc'])
+    $("#score_desc").text(result['score_desc'])
 }
 
 function model_get_result() {
@@ -212,12 +255,6 @@ function model_get_result() {
       console.log(data)
       result = data;
       view_put_result();
-      if (result.done) {
-        clearInterval(timer);
-        $("#upload_ctn").show();
-        if (target)
-          $("#run").show();
-      }
     }
   };
   $.ajax(p);
@@ -226,9 +263,10 @@ function model_get_result() {
 function myalert(msg) {
   $("#user_alert_text").text(msg);
   $(".alert").show();
+  track_event('login_error', 'error', msg);
 }
 
-function check_email_password(email, password) {
+function check_login(email, password, first_name, last_name) {
   if (!email_regex.test(email)) {
     myalert('Invalid email');
     return false;
@@ -237,13 +275,21 @@ function check_email_password(email, password) {
     myalert('Password should be at least 8 characters');
     return false;
   }
+  if (!first_name) {
+    myalert('Please enter your first name');
+    return false;
+  }
+  if (!last_name) {
+    myalert('Please enter your last name');
+    return false;
+  }
   return true;
 }
 
 function model_post_login() {
   var email = $("#email_input")[0].value;
   var password = $("#password_input")[0].value;
-  if (!check_email_password(email, password))
+  if (!check_login(email, password, 'not needed', 'not needed'))
     return;
   var p = {
     type: 'POST',
@@ -269,15 +315,15 @@ function model_post_logout(logout_option) {
 function model_post_register() {
   var email = $("#email_input")[0].value;
   var password = $("#password_input")[0].value;
-  var company = $("#company_input")[0].value;
-  var job_title = $("#job_title_input")[0].value;
-  if (!check_email_password(email, password))
+  var first_name = $("#first_name_input")[0].value;
+  var last_name = $("#last_name_input")[0].value;
+  if (!check_login(email, password, first_name, last_name))
       return;
   var p = {
     type: 'POST',
     url: "/register/" + email, 
     dataType: "JSON",
-    data: { 'email': email, 'password': password, 'company': company, 'job_title': job_title },
+    data: { 'email': email, 'password': password, 'first_name': first_name, 'last_name': last_name },
     success: function(data) { login_callback(data); }
   };
   $.ajax(p);
@@ -286,10 +332,11 @@ function model_post_register() {
 function login_callback(data) {
   console.log(data);
   if (data.auth) {
-    $('.alert').hide();
+    track_page('Login');
     user_id = data.user_id;
-    $("#email_input").prop('disabled', true);
-    $("#password_ctn").hide();
+    $('.alert').hide();
+    $('#welcome').text(data.first_name);
+    $("#login_ctn").hide();
     $("#register_ctn").hide();
     $("#login").hide();
     $("#logout").show();
@@ -298,7 +345,6 @@ function login_callback(data) {
     model_get_file();
     model_get_target();
     model_get_result();
-    timer = setInterval(model_get_result, 5000);
   }
   else
     myalert(data.message)
@@ -307,6 +353,9 @@ function login_callback(data) {
 function logout_callback(data) {
   console.log(data);
   if (data.logout) {
+    if (data.logout_option == 'delete')
+      track_page('Delete');
+    track_page('Logout');
     // not smart but safer
     location.reload();
   }

@@ -30,14 +30,19 @@ _no_model = [
 ]
 
 _linear_model = [
-    (Ridge(), True, False, 10, {
+    (Ridge(), True, False, 5, {
+        'mo__alpha': np.power(10., range(2, -5, -1)),
+        'mo__normalize': [True, False]
     }),
-    (LogisticRegression(), False, False, 10, {
+    (LogisticRegression(), False, False, 5, {
+        'mo__penalty': ['l1', 'l2'],
+        'mo__C': [1.0, 0.1, 10]
     })
 ]
 
 _tree_model = [
     (DecisionTreeRegressor(), True, True, 10, {
+        'mo__criterion': ('mae', ),
         'mo__random_state': (0, )
     }),
     (DecisionTreeClassifier(), False, True, 10, {
@@ -47,6 +52,7 @@ _tree_model = [
 
 _forest_model = [
     (RandomForestRegressor(), True, True, 10, {
+        'mo__criterion': ('mae', ),
         'mo__random_state': (0, )
     }),
     (RandomForestClassifier(), False, True, 10, {

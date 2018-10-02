@@ -1,7 +1,7 @@
 import { Selector } from 'testcafe';
 
-fixture `Baseline ML local`.page `http://127.0.0.1:8080`;
-// fixture `Getting Started`.page `https://baseline-ml.appspot.com`;
+// fixture `Baseline ML local`.page `http://127.0.0.1:8080`;
+fixture `Getting Started`.page `https://baseline-ml.appspot.com`;
 
 
 test('new user complete flow', async t => {
@@ -10,6 +10,8 @@ test('new user complete flow', async t => {
         .click('#register')
         .typeText('#email_input', 'robot1@testcafe.com')
         .typeText('#password_input', '12345678')
+        .typeText('#first_name_input', 'robot1')
+        .typeText('#last_name_input', 'testcafe')
         .click('#register_confirm')
         .expect(Selector('#user_alert_text').innerText).eql('ok');
 
@@ -24,14 +26,8 @@ test('new user complete flow', async t => {
         .click('#PassengerIdi')
         .click('#Survivedt')
         .click('#run')
-        .expect(Selector('#linear').innerText).eql('starting...');
-
-    await t
-        .wait(6000)
-        .expect(Selector('#linear').innerText).eql('learning...');
-
-    await t
-        .wait(15000)
+        .expect(Selector('#linear').innerText).eql('starting...')
+        .wait(30000)
         .expect(Selector('#zero'  ).innerText).eql('0.65')
         .expect(Selector('#linear').innerText).eql('0.9')
         .expect(Selector('#tree'  ).innerText).eql('0.8')
@@ -39,6 +35,7 @@ test('new user complete flow', async t => {
     
     await t
         .click('#delete')
+        .wait(1000)
         .expect(Selector('#file').innerText).eql('---');
 });
 
@@ -49,6 +46,8 @@ test('register login logout delete', async t => {
         .click('#register')
         .typeText('#email_input', 'robot2@testcafe.com')
         .typeText('#password_input', '12345678')
+        .typeText('#first_name_input', 'robot2')
+        .typeText('#last_name_input', 'testcafe')
         .click('#register_confirm')
         .expect(Selector('#user_alert_text').innerText).eql('ok')
         .expect(Selector('#file').innerText).eql('You have no file yet');
@@ -70,6 +69,8 @@ test('register login logout delete', async t => {
         .click('#register')
         .typeText('#email_input', 'robot2@testcafe.com')
         .typeText('#password_input', '87654321')
+        .typeText('#first_name_input', 'robot2')
+        .typeText('#last_name_input', 'testcafe')
         .click('#register_confirm')
         .expect(Selector('#user_alert_text').innerText).eql('User already registered')
         .expect(Selector('#file').innerText).eql('---');

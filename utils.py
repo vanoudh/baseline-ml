@@ -7,6 +7,7 @@ Created on Fri Nov 04 15:30:54 2016
 import os
 import pandas as pd
 import numpy as np
+from math import log10, floor
 import unicodedata
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.utils.multiclass import type_of_target
@@ -317,15 +318,44 @@ class PassThrought(BaseEstimator, TransformerMixin):
 
 def read_csv(path):
     _, extension = os.path.splitext(path)
-    if extension in 'gzip bz2 zip xz'.split():
-        compression = extension
-    else:
-        compression = 'infer'
-            
+
+    if extension.startswith('.'):
+        extension = extension[1:]
+    extension = extension.lower()
+
+    if extension == 'xlsx':
+        return pd.read_excel(path)
+
+    compression = 'infer'
+    # if extension in 'gzip bz2 zip xz'.split():
+    #     compression = extension
+    
     return pd.read_csv(path, 
                        sep=None, 
                        engine='python',
                        compression=compression)
+
+
+def round3(x):
+   """  
+   >>> round3(123)
+   123
+   >>> round3(1234)
+   1230
+   >>> round3(1234.0)
+   1230.0
+   >>> round3(0.123)
+   0.123
+   >>> round3(0.1234)
+   0.123
+   >>> round3(0)
+   0
+   >>> round3(.0)
+   0.0
+   """
+   if x == 0 or x == 0.:
+       return x
+   return round(x, 2-int(floor(log10(abs(x)))))
 
 
 if __name__ == "__main__":

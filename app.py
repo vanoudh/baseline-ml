@@ -9,7 +9,7 @@ import secrets
 from app_processor import Processor
 from email_checker import check_email
 from user import User
-from storage_factory import ds
+from storage_factory import fs, ds
 
 logging.getLogger().setLevel(logging.DEBUG)
 
@@ -24,12 +24,10 @@ processor = Processor()
 
 
 def user_string(user):
-    """Doc."""
     return "user {}: {}".format(user.id, user.is_authenticated)
 
 
 def get_user_from_storage(user_id):
-    """Doc."""
     js = ds.get('user', user_id)
     if js is None:
         return None
@@ -40,7 +38,6 @@ def get_user_from_storage(user_id):
 
 
 def save_user(user):
-    """Doc."""
     logging.debug('save {}'.format(user_string(user)))
     js = {
         'password_hash': user.password_hash,
@@ -51,7 +48,6 @@ def save_user(user):
 
 @login_manager.user_loader
 def load_user(user_id):
-    """Doc."""
     user = get_user_from_storage(user_id)
     logging.debug('loaded {}'.format(user_string(user)))
     return user
@@ -61,7 +57,6 @@ def load_user(user_id):
 
 @app.route('/')
 def route_home():
-    """Doc."""
     # if request.url.startswith('http://baseline-ml.appspot.com'):
     #     url = request.url.replace('http', 'https', 1)
     #     return redirect(url, code=302)
@@ -70,25 +65,21 @@ def route_home():
 
 @app.route('/app.js')
 def route_js():
-    """Doc."""
     return send_from_directory('.', 'app.js')
 
 
 @app.route('/favicon.ico')
 def route_favicon():
-    """Doc."""
     return send_from_directory('.', 'favicon.ico')
 
 
 @app.route('/version')
 def route_version():
-    """Doc."""
     return jsonify({'version': 0})
 
 
 @app.route('/login/<string:user_id>', methods=['POST'])
 def route_login(user_id):
-    """Doc."""
     user_id = request.form['email']
     password = request.form['password']
     user = get_user_from_storage(user_id)
@@ -96,25 +87,18 @@ def route_login(user_id):
         return jsonify({'message': 'Login failed'})
     save_user(user)
     login_user(user)
-    return jsonify({'user_id': user_id, 'auth': user.is_authenticated})
-
-
-@app.route('/logout/<string:user_id>', methods=['POST'])
-@login_required
-def route_logout(user_id):
-    """Doc."""
-    logout_user()
-    print(request.form)
-    if request.form['logout_option'] == 'delete':
-        logging.info('deleting account for {}'.format(user_id))
-        for kind in 'user target file result-zero result-linear result-tree result-forest'.split():
-            ds.delete(kind, user_id)
-    return jsonify({'logout': True})
+    user_info = ds.get('user_info', user_id)
+    first_name = user_info['first_name'] if user_info else user_id
+    r = {
+        'user_id': user_id, 
+        'auth': user.is_authenticated, 
+        'first_name': first_name
+    }
+    return jsonify(r)
 
 
 @app.route('/register/<string:user_id>', methods=['POST'])
 def route_register(user_id):
-    """Doc."""
     user_id = request.form['email']
     password = request.form['password']
     logging.debug(user_id)
@@ -129,24 +113,42 @@ def route_register(user_id):
     save_user(user)
     login_user(user)
     user_info = {
-        'company': request.form['company'],
-        'job_title': request.form['job_title']
+        'first_name': request.form['first_name'],
+        'last_name': request.form['last_name']
     }
-    ds.put('userinfo', user_id, user_info)
-    return jsonify({'user_id': user_id, 'auth': user.is_authenticated})
+    ds.put('user_info', user_id, user_info)
+    r = {
+        'user_id': user_id, 
+        'auth': user.is_authenticated, 
+        'first_name': user_info['first_name']
+    }
+    return jsonify(r)
+
+
+@app.route('/logout/<string:user_id>', methods=['POST'])
+@login_required
+def route_logout(user_id):
+    logout_user()
+    logout_option = request.form['logout_option']
+    if logout_option == 'delete':
+        logging.info('deleting account for {}'.format(user_id))
+        filep = ds.get('file', user_id)
+        if filep is not None:
+            fs.delete(filep['filename']) 
+        for kind in 'user target file result_zero result_linear result_tree result_forest score_desc'.split():
+            ds.delete(kind, user_id)
+    return jsonify({'logout': True, 'logout_option': logout_option})
 
 
 @app.route('/user_file/<string:user_id>')
 @login_required
 def route_user_file(user_id):
-    """Doc."""
     return jsonify(processor.get_file(user_id))
 
 
 @app.route('/upload/<string:user_id>', methods=['POST'])
 @login_required
 def route_upload(user_id):
-    """Doc."""
     file = request.files['files[]']
     return processor.upload(user_id, file)
 
@@ -154,7 +156,6 @@ def route_upload(user_id):
 @app.route('/target/<string:user_id>', methods=['GET', 'PUT'])
 @login_required
 def route_target(user_id):
-    """Doc."""
     if request.method == 'GET':
         r = processor.get_target(user_id)
     elif request.method == 'PUT':
@@ -165,7 +166,6 @@ def route_target(user_id):
 @app.route('/job/<string:user_id>', methods=['POST'])
 @login_required
 def route_job(user_id):
-    """Doc."""
     print(request.form)
     r = processor.run_job(user_id, request.form.to_dict())
     return jsonify(r)
@@ -174,6 +174,5 @@ def route_job(user_id):
 @app.route('/result/<string:user_id>', methods=['GET'])
 @login_required
 def route_result(user_id):
-    """Doc."""
     r = processor.get_result(user_id)
     return jsonify(r)

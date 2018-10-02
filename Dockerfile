@@ -1,5 +1,7 @@
 FROM docker.io/vanoudh/python-ml
 
+WORKDIR /app
+
 # Add files
 ADD . .
 

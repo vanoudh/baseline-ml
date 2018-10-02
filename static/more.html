@@ -19,7 +19,7 @@
 
     <style>
       body { 
-        padding: 60px;
+        padding: 30px;
       }
     </style>
     
@@ -27,14 +27,14 @@
   </head>
   <body>
     <h2 id="why">Why Baseline ML ?</h2>
-    <p>In data science as in innovation in general, it is a very good practice
+    <p>In data science as in innovation in general, it is good practice
       to work in short iterations, building prototypes and simple products quickly
       instead of spending months or years building the perfect product.
     </p>
     <p>Baseline ML helps you do that with machine learning models,
-        providing the first models (often called baseline models) in a few minutes.
+        providing the first models (baseline models) in a few minutes.
     </p>
-    <p>I expect Baseline ML to be primarily used by data scientist but I
+    <p>I expect Baseline ML to be primarily used by data scientists but I
       hope it can also be a simple discovery tool for anyone trying to 
       leverage machine learning on their data.
     </p> 
@@ -45,54 +45,59 @@
       market and you want to know quickly what kind of baseline 
       performance you can expect when predicting prices.  
     </p>
-    <p>First you need to <b>upload</b> your data as a CSV file. 
-      A CSV file is simply a table of your data, each column representing 
-      a variable, each row representing a data point:</p>
-    <p>
-      <table>
-          <tr><td>Id,SquareFootage,City,MonthlyRent,YearlyRent</td></tr>
-          <tr><td>0,800,Palo Alto,3500,42000</td></tr>
-          <tr><td>1,1200,San Francisco,2900,34800</td></tr>
-          <tr><td>2,900,San Francisco,3000,36000</td></tr>
-          <tr><td>...</td></tr>
-      </table>
+    <p>First you need to <b>upload</b> your data as a CSV file,
+      each line representing a data point (a house to rent),
+      each column representing a feature (city, square footage, price...).
+      The content of the file should look like this:
     </p>
-    <p>The variables can be separated by a comma or semi-colon or space. 
-    The file can be compressed, Baseline ML will try to understand it.</p>
+    
+    <pre>
+Id,SquareFootage,City,MonthlyRent,YearlyRent
+1,800,Palo Alto,3500,42000
+2,1200,San Francisco,2900,34800
+3,900,San Francisco,3000,36000
+...
+...
+100,1500,San Mateo,3000,36000</pre>
 
-    <p>Then you have to choose the <b>target</b>. Baseline ML will present you
-      the variables that it found in the dataset, and you will have to choose
-      the one that you want to predict (the target). Here you may
-      choose MonthlyRent as the target. You can also ignore 
-      variables that should not be used for prediction, because it would
-      make no sense or because they are directly linked to the target.
-      Here you should ignore Id and YearlyRent.
+    <p>A complete example can be found here : <a href='house_prices_simple.csv'>House Prices - Simple</a></p>
+
+    <p>Then you have to choose the feature that you want to predict,
+      i.e. the <b>target</b>. Baseline ML will present you 
+      all the features that it found in the dataset and you will have to 
+      click in the "target" column to select the target. Here you would  
+      choose <i>MonthlyRent</i>. You may also click in the "ignored"
+      column if some features should have no relation with the target or 
+      on the contrary have too much relation with the target.
+      Here you would ignore <i>Id</i> (no relation) and <i>YearlyRent</i> (too much relation).
+      The other features remain in the default "predictor" column,
+      you do not have to select them.
     </p>
     <p>Finally you simply press <b>run</b> and wait for the results. Baseline ML will
-      take the first 80% of your data to try a few baseline models.
+      take the first 80% of your data and tune a few baseline models:
       The model "zero" is barely a model, it uses the average or most 
-      frequent value of the target as prediction, ignoring the other variables.
+      frequent value of the target as prediction, ignoring the other features.
       It is still useful as a baseline, especially when you are trying to
       predict a rare event.
       "linear", "tree", and "forest" are classic models with a little
       preprocessing and very little tuning, they should provide a fast and 
       decent baseline most of the time.
       After the tuning, the models are evaluated on the
-      remaining 20% of the data. The performance on the last 20% is your 
-      baseline 
-      performance and is displayed. This is the kind of performance
+      last 20% of the data. The performance on the last 20% is your 
+      baseline performance and is displayed in the "Result" section. 
+      The baseline performance is the kind of performance
       you can expect on this dataset, if it is satisfactory then it is great
       news, it should be easy to build a model at least as good. If it is
-      disappointing try adding more meaningful variables to your
-      dataset, like the neighborhood in our example. If it is extremelly 
-      good then make sure you ignored the variables directly linked to
-      your target, like the YearlyRent.
+      disappointing try adding more meaningful features to your
+      dataset, like the neighborhood for example. If it is extremely 
+      good then make sure you ignored the features directly linked to
+      your target.
       In any case, after you have done some exploration, talk to your 
       data science team !
     </p>
     <p>The performance will be shown in "mean absolute error", 
-      this is simply the error between the prediction and the reality,
-      in absolute value and averaged over the test data points. If the target is 
+      this is simply the error between the prediction and the true values,
+      in absolute and averaged over the test data points. If the target is 
       in dollars, the performance will be in dollars.
     </p>
     <p>You can also try and predict the city based on the rent.
@@ -100,9 +105,23 @@
       simply the success rate of the prediction on the test data points.
       The accuracy is a percentage, between 0 and 100%.
     </p>
-    <p>In any case you should have at least 100 data points, 
-      preferably 10 000 or more. Otherwise the results will have little
-      credibility.</p>
+
+    <p>Note on data format : the features are usually separated by a comma, 
+        but if you use
+        something else like a semi-colon or a space it should work.
+        If the file is compressed with a standard file extension,
+        it should work as well.</p>
+  
+      <p>Note on data quality : of course a good data quality is always preferable,
+        but it is especially true of the target, if your target is accurate with no missing values
+        you do not have to worry too much about the other features : features
+        with low quality will be ignored by the models.
+      </p>
+    
+      <p>Note on data quantity : You should have at least 100 data points, 
+          preferably 1000 or more, otherwise the results will have little
+          credibility. 
+      </p>
 
     <h2>Contact</h2>
     <p><a href='mailto:baseline-ml@googlegroups.com'>baseline-ml@googlegroups.com</a></p> 

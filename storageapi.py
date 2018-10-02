@@ -23,42 +23,39 @@ dc = datastore.Client(project_id)
 
 
 class FileStore:
-    """Doc."""
 
     def save(self, filename, file):
-        """Doc."""
         blob = bucket.blob(filename)
         blob.upload_from_string(file.read(), content_type=file.content_type)
 
     def get_path(self, filename):
-        """Doc."""
         blob = bucket.blob(filename)
         sec = secrets.token_hex(4//2)
         path = os.path.join(STORAGE_FOLDER, sec + filename)
         blob.download_to_filename(path)
         return path
 
+    def delete(self, filename):
+        blob = bucket.blob(filename)
+        blob.delete()
+
 
 class DocStore:
-    """Doc."""
 
     def _key(self, kind, name):
         return dc.key(kind, name)
 
     def put(self, kind, name, doc):
-        """Doc."""
         entity = datastore.Entity(self._key(kind, name))        
         entity.update(doc)
         dc.put(entity)
 
     def log(self, kind, doc):
-        """Doc."""
         entity = datastore.Entity(dc.key(kind))        
         entity.update(doc)
         dc.put(entity)
 
     def get(self, kind, name):
-        """Doc."""
         r = dc.get(self._key(kind, name))
         if r is None:
             return r

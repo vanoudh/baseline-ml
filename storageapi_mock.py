@@ -21,6 +21,14 @@ class FileStore:
         """Doc."""
         return os.path.join(STORAGE_FOLDER, filename)
 
+    def delete(self, filename):
+        """Doc."""
+        path = self.get_path(filename)
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
 
 class DocStore:
     """Doc."""
