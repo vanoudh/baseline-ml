@@ -5,6 +5,7 @@ Created on Tue Jun 13 17:23:46 2017
 @author: mvanoudh
 """
 
+import logging
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import TruncatedSVD
 from utils import ratio2int, todf
@@ -20,6 +21,7 @@ class TruncatedSVD2(BaseEstimator, TransformerMixin):
         self.k_int = ratio2int(p, self.k)
         self.donothing = (self.k_int <= 0 or self.k_int >= p)
         if self.donothing:
+            logging.debug('svd do nothing')
             self.feature_names = todf(X).columns
         else:
             self.feature_names = ['svd' + str(i) for i in range(self.k_int)]

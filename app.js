@@ -1,4 +1,4 @@
-console.log("wadell");
+console.log("lindamar");
 
 "use strict";
 
@@ -138,12 +138,20 @@ function view_put_target() {
   }
 }
 
+function debug_target() {
+  var e = $("#target")[0];
+  for (var i=0; i<e.children.length; i++) {
+    var cln = e.children[i];
+    console.log(cln.children[1].textContent + 'END');
+  }
+}
+
 function view_get_target() {
   var tl = [];
   var e = $("#target")[0];
   for (var i=0; i<e.children.length; i++) {
     var c = e.children[i];
-    var v = c.children[1].innerText;
+    var v = c.children[1].textContent;
     if (v == '---') {
       target = null;
       return;
@@ -155,7 +163,7 @@ function view_get_target() {
     else
       tl[i] = v + 'i';
   }
-  target = {'target': tl.join(',')}
+  target = {'target': tl.join(',')};
 }
 
 function model_get_target(){

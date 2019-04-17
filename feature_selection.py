@@ -73,6 +73,7 @@ class SelectKBest2(BaseEstimator, TransformerMixin):
         k_int = ratio2int(p, self.k)
         self.donothing = (k_int <= 0 or k_int >= p)
         if self.donothing:
+            logging.debug('selector do nothing')
             return self
         selector = SelectKBest(score_func=self.score_func, k=k_int)
         selector.fit(X, y)

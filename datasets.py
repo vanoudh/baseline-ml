@@ -9,7 +9,7 @@ from os import path
 import pandas as pd
 import numpy as np
 from sklearn.datasets import load_boston, load_iris
-from sklearn2.utils import split_xy
+from utils import split_xy
 
 _here = path.abspath(path.dirname(__file__))
 

@@ -15,7 +15,7 @@ gcloud config set project xxx
 
 gsutil mb gs://$GOOGLE_CLOUD_PROJECT$-media
 
-gcloud app deploy --no-promote
+gcloud beta app deploy --quiet --verbosity debug
 
 gcloud app logs tail -s default
 

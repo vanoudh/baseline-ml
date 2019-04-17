@@ -2,22 +2,27 @@
 import os
 import logging
 import time
+import json
 from flask import Flask, request, send_from_directory, jsonify, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user
 import secrets
+from subprocess import Popen
+from werkzeug.utils import secure_filename
 
-from app_processor import Processor
 from email_checker import check_email
 from user import User
-from storage_factory import fs, ds
+from utils import read_csv
+from storage_factory import ds, fs, put_result, get_result
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 login_manager = LoginManager()
 login_manager.init_app(app)
-processor = Processor()
+
+
+MODEL_LIST = 'zero linear tree forest'.split()
 
 
 """ Utils """
@@ -55,11 +60,12 @@ def load_user(user_id):
 
 """ Definition of routes. """
 
+import urllib3
+
 @app.route('/')
 def route_home():
-    # if request.url.startswith('http://baseline-ml.appspot.com'):
-    #     url = request.url.replace('http', 'https', 1)
-    #     return redirect(url, code=302)
+    # url = 'https://raw.githubusercontent.com/vanoudh/hello/master/app.html'
+    # return urllib3.PoolManager().request('GET', url).data
     return send_from_directory('.', 'app.html')
 
 
@@ -143,36 +149,72 @@ def route_logout(user_id):
 @app.route('/user_file/<string:user_id>')
 @login_required
 def route_user_file(user_id):
-    return jsonify(processor.get_file(user_id))
+    r = ds.get('file', user_id)
+    return jsonify(r)
 
 
 @app.route('/upload/<string:user_id>', methods=['POST'])
 @login_required
 def route_upload(user_id):
+    print(request.files)
     file = request.files['files[]']
-    return processor.upload(user_id, file)
+    source_filename = secure_filename(file.filename)
+    filename = '-'.join(['data', user_id, source_filename])
+    ds.put('file', user_id, {'filename': filename, 'source_filename': source_filename})
+    fs.save(filename, file)
+    path = fs.get_path(filename)
+    vl = []
+    message = "{}"
+    try:
+        df = read_csv(path)
+        for c in df.columns:
+            vl.append(c + 'p')
+        ds.put('target', user_id, {'target':','.join(vl)})
+    except Exception as e:
+        logging.warning(e)
+        message = "Failed to parse {}"            
+        fs.delete(filename)
+        ds.delete('file', user_id)
+    return json.dumps({'name': message.format(source_filename)})
 
 
 @app.route('/target/<string:user_id>', methods=['GET', 'PUT'])
 @login_required
 def route_target(user_id):
     if request.method == 'GET':
-        r = processor.get_target(user_id)
+        r = ds.get('target', user_id)
     elif request.method == 'PUT':
-        r = processor.set_target(user_id, request.form.to_dict())
+        r = ds.put('target', user_id, request.form.to_dict())
     return jsonify(r)
+
+
+def _run_job(user_id, model):
+    logging.info('run {}'.format(model))
+    cmd = "python automl_run.py {} {}".format(user_id, model)
+    # fname_out = "{}/run-{}-{}.log".format(LOG_FOLDER, user_id, model)
+    # with open(fname_out, "wb") as out:
+    job = Popen(cmd, shell=True)
+    logging.debug('rcode {}'.format(job.returncode))
 
 
 @app.route('/job/<string:user_id>', methods=['POST'])
 @login_required
 def route_job(user_id):
-    print(request.form)
-    r = processor.run_job(user_id, request.form.to_dict())
-    return jsonify(r)
+
+    for m in MODEL_LIST:
+        put_result(m, user_id, 'running', 'pending...')
+
+    _run_job(user_id, 'all')
+    return route_result(user_id)
 
 
 @app.route('/result/<string:user_id>', methods=['GET'])
 @login_required
 def route_result(user_id):
-    r = processor.get_result(user_id)
-    return jsonify(r)
+    r = list(map(lambda m:get_result(m, user_id) , MODEL_LIST))
+    j = {}
+    for m, rr in zip(MODEL_LIST, r):
+        j[m] = rr
+    sd = ds.get('score_desc', user_id)
+    j['score_desc'] = sd['score_desc'] if sd else 'Result'
+    return jsonify(j)

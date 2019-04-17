@@ -323,7 +323,7 @@ def read_csv(path):
         extension = extension[1:]
     extension = extension.lower()
 
-    if extension == 'xlsx':
+    if extension in 'xls xlsx'.split():
         return pd.read_excel(path)
 
     compression = 'infer'

@@ -1,4 +1,4 @@
-LivingArea,LotArea,GarageArea,UnfinishedBsmtSF,TotalBsmtSF,1stFlrSF,2ndFlrSF,TotalRooms,OverallQual,OverallCond,BsmtQual,YearBuilt,YearRemod,Neighborhood,SalePrice
+LivingArea,LotArea,GarageArea,UnfinBsmtSF,TotalBsmtSF,1stFlrSF,2ndFlrSF,TotalRooms,OverallQual,OverallCond,BsmtQual,YearBuilt,YearRemod,Neighborhood,SalePrice
 1710,8450,548,150,856,856,854,8,7,5,Gd,2003,2003,CollgCr,208500
 1262,9600,460,284,1262,1262,0,6,6,8,Gd,1976,1976,Veenker,181500
 1786,11250,608,434,920,920,866,6,7,5,Gd,2001,2002,CollgCr,223500

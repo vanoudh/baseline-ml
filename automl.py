@@ -23,6 +23,16 @@ from sklearn.feature_selection import mutual_info_classif, mutual_info_regressio
 from sklearn.feature_selection import f_regression, f_classif
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import FunctionTransformer
+from sklearn.dummy import DummyRegressor, DummyClassifier
+from sklearn.linear_model import Ridge, LogisticRegression
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
+from sklearn.ensemble import ExtraTreesRegressor, ExtraTreesClassifier
+from autosklearn.classification import AutoSklearnClassifier
+from autosklearn.regression import AutoSklearnRegressor
 
 from feature_extraction import DateEncoder, SparseCatEncoder
 from feature_extraction import ConstantInputer, NumericFilter
@@ -33,7 +43,6 @@ from feature_selection import SelectKBest2
 from feature_selection import f_forest_regression, f_linear_regression
 from feature_selection import f_forest_classification, f_linear_classification
 from metrics import avg_roc_auc_scorer
-from automl_models import model_factory
 
 seed(0)
 
@@ -41,6 +50,61 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(message)s')
 logging.getLogger().setLevel(level=logging.INFO)
 
 pd.options.display.width = 160
+
+
+# Format is
+# model_constructor, is_regressor, is_tree, max_try, { parameters }
+
+
+_no_model = [
+    (DummyRegressor(), True, False, 10, {
+        'mo__strategy': ['mean', 'median']
+    }),
+    (DummyClassifier(), False, False, 10, {
+        'mo__strategy': ['stratified', 'most_frequent']
+    })
+]
+
+_linear_model = [
+    (Ridge(), True, False, 10, {
+        'mo__alpha': [1.0, 10]
+    }),
+    (LogisticRegression(), False, False, 10, {
+        'mo__C': [1.0, 0.1]
+    })
+]
+
+_tree_model = [
+    (DecisionTreeRegressor(), True, True, 10, {
+        'mo__criterion': ('mae', ),
+        'mo__random_state': (0, )
+    }),
+    (DecisionTreeClassifier(), False, True, 10, {
+        'mo__random_state': (0, )
+    })
+]
+
+_forest_model = [
+    (RandomForestRegressor(), True, True, 10, {
+        'mo__criterion': ('mae', ),
+        'mo__random_state': (0, )
+    }),
+    (RandomForestClassifier(), False, True, 10, {
+        'mo__random_state': (0, )
+    })
+]
+
+
+def model_factory(engine):
+    if engine == 'zero':
+        return _no_model
+    if engine == 'linear':
+        return _linear_model
+    if engine == 'tree':
+        return _tree_model
+    if engine == 'forest':
+        return _forest_model
+    raise ValueError('unknown engine :{}'.format(engine))
 
 
 def get_type(y):
@@ -54,9 +118,9 @@ def get_type(y):
 
 def get_selector(is_regressor, is_tree):
     if is_regressor:
-        return [f_regression, mutual_info_regression]
+        return [mutual_info_regression]
     else:
-        return [f_classif, mutual_info_classif]
+        return [mutual_info_classif]
 
 
 def get_pipeline(est, is_tree, is_regressor, params):
@@ -71,18 +135,19 @@ def get_pipeline(est, is_tree, is_regressor, params):
     elif is_tree:
         ppl = Pipeline([
                        ('da', DateEncoder()),
-                       ('du', OrdinalEncoder()),
+                       ('oe', OrdinalEncoder()),
                        ('ft', FunctionTransformer()),
                        ('se', SelectKBest2()),
                        ('mo', est)
                       ])
         params['da__ascategory'] = [False]
-        params['du__drop_invariant'] = [True]
+        params['oe__drop_invariant'] = [True]
         params['ft__func'] = [lambda x:x.fillna(-999)]
         params['ft__validate'] = [False]
         params['se__score_func'] = get_selector(is_regressor, is_tree)
-        params['se__k'] = [0.2, 0.5, 0.8, 1000, 1000]
+        params['se__k'] = [10000]
     else:
+        # linear / knn
         ppl = Pipeline([
                 ('da', DateEncoder()),
                 ('en', FeatureUnion([
@@ -98,8 +163,8 @@ def get_pipeline(est, is_tree, is_regressor, params):
         params['en__ca__ft__func'] = [lambda x:x[object_cols(x)]]
         params['en__ca__ft__validate'] = [False]
         params['fu__se__score_func'] = get_selector(is_regressor, is_tree)
-        params['fu__se__k'] = [0.2, 0.5, 0.8, 1000]
-        params['fu__dr__k'] = [0.2, 0.5, 0.8, 1000]
+        params['fu__se__k'] = [10000]
+        params['fu__dr__k'] = [0.3]
 
     return name, ppl, params
 
@@ -118,11 +183,11 @@ def get_pipelines(x, y, engine):
 
 def get_search_model(ppl, params, scorer, cv, n_iter, verbose):
     grid_size = len(ParameterGrid(params))
-    if grid_size < n_iter:
-        gs = GridSearchCV(ppl, params, scorer, cv=cv, verbose=verbose)
-    else:
-        gs = RandomizedSearchCV(ppl, params, n_iter, scorer, cv=cv,
-                                verbose=verbose, random_state=0)
+    logging.info('trying all {} configs'.format(grid_size))
+    gs = GridSearchCV(ppl, params, scorer, cv=cv, verbose=verbose)
+    # logging.debug('trying {} from {} configs'.format(n_iter, grid_size))
+    # gs = RandomizedSearchCV(ppl, params, n_iter, scorer, cv=cv,
+    #                         verbose=verbose, random_state=0)
     return gs
 
 
@@ -171,7 +236,7 @@ class AutoSimple:
                  scorer=None, 
                  cv=None,   
                  iter_factor=1, 
-                engine='auto-sklearn'):
+                 engine='zero'):
         self.scorer = scorer
         self.cv = cv
         self.iter_factor = iter_factor

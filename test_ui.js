@@ -1,7 +1,7 @@
 import { Selector } from 'testcafe';
 
-// fixture `Baseline ML local`.page `http://127.0.0.1:8080`;
-fixture `Getting Started`.page `https://baseline-ml.appspot.com`;
+//fixture `Baseline ML local`.page `http://127.0.0.1:8080`;
+fixture `Baseline ML`.page `https://baseline-ml.appspot.com`;
 
 
 test('new user complete flow', async t => {
@@ -26,12 +26,12 @@ test('new user complete flow', async t => {
         .click('#PassengerIdi')
         .click('#Survivedt')
         .click('#run')
-        .expect(Selector('#linear').innerText).eql('starting...')
-        .wait(30000)
+        .expect(Selector('#linear').innerText).eql('pending...')
+        .wait(10000)
         .expect(Selector('#zero'  ).innerText).eql('0.65')
-        .expect(Selector('#linear').innerText).eql('0.9')
-        .expect(Selector('#tree'  ).innerText).eql('0.8')
-        .expect(Selector('#forest').innerText).eql('0.8');
+        .expect(Selector('#linear').innerText).eql('0.85')
+        .expect(Selector('#tree'  ).innerText).eql('0.7')
+        .expect(Selector('#forest').innerText).eql('0.9');
     
     await t
         .click('#delete')

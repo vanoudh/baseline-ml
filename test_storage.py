@@ -3,7 +3,7 @@
 import logging
 import pytest
 import secrets
-from .storage_factory_pytest import ds
+from storage_factory import ds
 
 kind = 'utest'
 name = secrets.token_hex(4//2)
